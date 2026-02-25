@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-meteor: meteor 5s linear infinite;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(var(--angle)) translateX(0);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(var(--angle)) translateX(-500px);
+      opacity: 0;
+    }
+  }
+}
+
+:root {
+  --background: #000000;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --primary: #FF236C;
+  --primary-foreground: #fafafa;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #FF236C;
+  --radius: 0.75rem;
+}
+
+body, html {
+  background-color: #000000;
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+}
+
+.glow-tiktok {
+  box-shadow: 0 0 15px rgba(255, 35, 108, 0.3), 0 0 15px rgba(255, 35, 108, 0.3);
+}
+
+.border-tiktok {
+  border-image: linear-gradient(to right, #FF236C, #FF236C) 1;
+}
+
+.bg-tiktok-gradient {
+  background: linear-gradient(135deg, #FF236C 0%, #FF236C 100%);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
