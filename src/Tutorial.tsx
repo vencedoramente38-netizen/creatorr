@@ -14,11 +14,11 @@ const Tutorial: React.FC = () => {
     <div className="space-y-8 pb-20">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Tutorial</h1>
-        <p className="text-zinc-400 mt-1">Aprenda a dominar o ecossistema Creator Lab em poucos minutos.</p>
+        <p className="text-zinc-400 mt-1">Aprenda a dominar o ecossistema Creatoria em poucos minutos.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="p-8 rounded-3xl bg-[#09090B] border border-zinc-800 relative overflow-hidden group"

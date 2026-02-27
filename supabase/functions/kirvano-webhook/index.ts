@@ -103,7 +103,7 @@ Deno.serve(async (req: Request) => {
     // 2. Welcome Email
     const resendKey = Deno.env.get('RESEND_API_KEY');
     let emailStatus = "skipped (no key)";
-    const fromEmail = 'onboarding@resend.dev'; // Forçado para sandbox
+    const fromEmail = 'suporte123@creatoria.com.br';
     
     if (resendKey) {
       try {
@@ -140,7 +140,7 @@ Deno.serve(async (req: Request) => {
                   expirationInfo +
                 '</div>' +
                 '<div style="text-align: center; margin-top: 30px;">' +
-                  '<a href="https://creatoria.vercel.app" style="display: inline-block; background: #E81C3E; color: #fff; padding: 18px 40px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(232, 28, 62, 0.2);">ENTRAR NA PLATAFORMA</a>' +
+                  '<a href="https://creator.vercel.app" style="display: inline-block; background: #E81C3E; color: #fff; padding: 18px 40px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 12px rgba(232, 28, 62, 0.2);">ENTRAR NA PLATAFORMA</a>' +
                 '</div>' +
                 '<hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">' +
                 '<p style="font-size: 13px; color: #888; text-align: center;">Este é um e-mail automático. Por favor, não responda.</p>' +
