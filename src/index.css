@@ -9,9 +9,11 @@
       transform: rotate(var(--angle)) translateX(0);
       opacity: 1;
     }
+
     70% {
       opacity: 1;
     }
+
     100% {
       transform: rotate(var(--angle)) translateX(-500px);
       opacity: 0;
@@ -20,11 +22,11 @@
 }
 
 :root {
-  --background: #000000;
+  --background: #050505;
   --foreground: #fafafa;
-  --card: #09090b;
+  --card: #0D0D0D;
   --card-foreground: #fafafa;
-  --popover: #09090b;
+  --popover: #0D0D0D;
   --popover-foreground: #fafafa;
   --primary: #FF236C;
   --primary-foreground: #fafafa;
@@ -39,11 +41,12 @@
   --border: #27272a;
   --input: #27272a;
   --ring: #FF236C;
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 }
 
-body, html {
-  background-color: #000000;
+body,
+html {
+  background-color: #050505;
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
 }

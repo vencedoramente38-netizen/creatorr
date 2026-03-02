@@ -36,7 +36,7 @@ const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden bg-black">
+    <div className="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden bg-[#050505]">
       {/* Background Effects */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse delay-1000" />
@@ -56,7 +56,7 @@ const Auth: React.FC = () => {
           <p className="text-zinc-500 mt-2 font-medium">A plataforma definitiva para criadores.</p>
         </div>
 
-        <div className="p-8 rounded-3xl bg-[#09090B] backdrop-blur-xl border border-zinc-800 shadow-2xl">
+        <div className="p-8 rounded-xl bg-[#0D0D0D] backdrop-blur-xl border border-zinc-800 shadow-2xl">
           <div className="flex gap-4 mb-8">
             <button
               className="flex-1 py-2 text-sm font-bold border-b-2 border-primary text-white transition-all"
@@ -76,7 +76,7 @@ const Auth: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-white"
+                  className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-white"
                 />
               </div>
             </div>
@@ -94,7 +94,7 @@ const Auth: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-white"
+                  className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-white"
                 />
               </div>
             </div>
@@ -102,7 +102,7 @@ const Auth: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-tiktok-gradient text-white font-black italic uppercase tracking-widest rounded-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full py-4 bg-tiktok-gradient text-white font-black italic uppercase tracking-widest rounded-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
             >
               {loading ? "Processando..." : "Entrar"}
               {!loading && <ArrowRight size={18} />}
