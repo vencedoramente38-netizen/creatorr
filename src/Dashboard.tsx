@@ -21,7 +21,7 @@ import {
 } from 'recharts';
 
 const Dashboard: React.FC = () => {
-  const { stats } = useApp();
+  const { stats, products } = useApp();
 
   const alerts = [
     { id: 1, icon: Flame, text: "Novo produto em alta no TikTok Shop", color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/50" },
@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
     { label: 'Faturamento Total', value: stats.faturamento, sublabel: 'Faturamento total', icon: TrendingUp, color: 'text-emerald-500' },
     { label: 'Pedidos', value: stats.pedidos.toString(), sublabel: 'Pedidos', icon: ShoppingCart, color: 'text-primary' },
     { label: 'Comissão Total', value: stats.comissao, sublabel: 'Comissão total', icon: BarChart3, color: 'text-purple-500' },
-    { label: 'Produtos Ativos', value: stats.produtosAtivos.toString(), sublabel: 'Produtos ativos', icon: Package, color: 'text-orange-500' },
+    { label: 'Produtos Ativos', value: products.length.toString(), sublabel: 'Produtos ativos', icon: Package, color: 'text-orange-500' },
   ];
 
   return (
@@ -72,7 +72,7 @@ const Dashboard: React.FC = () => {
           className="lg:col-span-2 p-6 rounded-2xl bg-[#09090B] border border-zinc-800"
         >
           <h3 className="text-lg font-bold mb-6">Evolução de Vendas</h3>
-          <div className="h-[300px] w-full">
+          <div className="h-[250px] sm:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats.chartData}>
                 <defs>

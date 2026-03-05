@@ -18,7 +18,9 @@ import {
     ChevronRight,
     TrendingUp,
     Target,
-    Zap
+    Zap,
+    AlertCircle,
+    Lightbulb
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { useDropzone } from 'react-dropzone';
@@ -118,7 +120,7 @@ const CreateProfile: React.FC = () => {
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#E81C3E', '#FF236C', '#FFFFFF']
+                colors: ['#FF236C', '#FF236C', '#FFFFFF']
             });
             addNotification("Sucesso", "Análise concluída!");
         }, 5000);
@@ -175,7 +177,7 @@ const CreateProfile: React.FC = () => {
                     onClick={() => setTab('analise')}
                     className={cn(
                         "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all",
-                        tab === 'analise' ? "bg-[#E81C3E] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
+                        tab === 'analise' ? "bg-[#FF236C] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
                     )}
                 >
                     <Search className="w-4 h-4" /> Análise de Conta
@@ -184,7 +186,7 @@ const CreateProfile: React.FC = () => {
                     onClick={() => setTab('assistente')}
                     className={cn(
                         "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all",
-                        tab === 'assistente' ? "bg-[#E81C3E] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
+                        tab === 'assistente' ? "bg-[#FF236C] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
                     )}
                 >
                     <Wand2 className="w-4 h-4" /> Assistente de Criação
@@ -201,8 +203,8 @@ const CreateProfile: React.FC = () => {
                         className="p-8 rounded-2xl bg-[#040404] border border-zinc-800"
                     >
                         <div className="flex items-start gap-4 mb-8">
-                            <div className="p-3 rounded-xl bg-[#E81C3E]/10">
-                                <Crown className="w-6 h-6 text-[#E81C3E]" />
+                            <div className="p-3 rounded-xl bg-[#FF236C]/10">
+                                <Crown className="w-6 h-6 text-[#FF236C]" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold">Análise de Conta</h2>
@@ -240,7 +242,7 @@ const CreateProfile: React.FC = () => {
                                 <select
                                     value={niche}
                                     onChange={(e) => setNiche(e.target.value)}
-                                    className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#E81C3E]"
+                                    className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
                                 >
                                     <option value="">Escolha o nicho do seu perfil</option>
                                     {NICHES.map(n => <option key={n} value={n}>{n}</option>)}
@@ -258,7 +260,7 @@ const CreateProfile: React.FC = () => {
                                         {...getRootProps()}
                                         className={cn(
                                             "border-2 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all",
-                                            isDragActive ? "border-[#E81C3E] bg-[#E81C3E]/5" : "border-zinc-800 hover:border-zinc-700 bg-black/50"
+                                            isDragActive ? "border-[#FF236C] bg-[#FF236C]/5" : "border-zinc-800 hover:border-zinc-700 bg-black/50"
                                         )}
                                     >
                                         <input {...getInputProps()} />
@@ -282,7 +284,7 @@ const CreateProfile: React.FC = () => {
                             <button
                                 onClick={runAnalysis}
                                 disabled={isAnalyzing}
-                                className="w-full py-4 bg-[#E81C3E] text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 disabled:opacity-50"
+                                className="w-full py-4 bg-[#FF236C] text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 disabled:opacity-50"
                             >
                                 {isAnalyzing ? (
                                     <Sparkles className="w-5 h-5 animate-pulse" />
@@ -296,7 +298,7 @@ const CreateProfile: React.FC = () => {
                                 <div className="space-y-3 pt-4">
                                     <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
                                         <motion.div
-                                            className="bg-[#E81C3E] h-full"
+                                            className="bg-[#FF236C] h-full"
                                             initial={{ width: 0 }}
                                             animate={{ width: `${analysisProgress}%` }}
                                         />
@@ -315,27 +317,33 @@ const CreateProfile: React.FC = () => {
                                 >
                                     <div className="flex items-center justify-between">
                                         <h3 className="font-bold flex items-center gap-2">
-                                            <Zap className="w-4 h-4 text-[#E81C3E]" /> Resultado da Análise
+                                            <Zap className="w-4 h-4 text-[#FF236C]" /> Resultado da Análise
                                         </h3>
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] font-bold text-zinc-500">SCORE:</span>
-                                            <span className="text-2xl font-black text-[#E81C3E]">{analysisResult.score}</span>
+                                            <span className="text-2xl font-black text-[#FF236C]">{analysisResult.score}</span>
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="p-4 bg-black/40 rounded-xl border border-emerald-500/20">
-                                            <p className="text-[10px] font-bold text-emerald-500 uppercase mb-2">✅ Pontos Fortes</p>
+                                            <p className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-1.5">
+                                                <CheckCircle2 size={12} /> Pontos Fortes
+                                            </p>
                                             <p className="text-sm text-zinc-300">{analysisResult.pontosFortes}</p>
                                         </div>
                                         <div className="p-4 bg-black/40 rounded-xl border border-amber-500/20">
-                                            <p className="text-[10px] font-bold text-amber-500 uppercase mb-2">⚠️ Melhorias</p>
+                                            <p className="text-[10px] font-bold text-amber-500 uppercase mb-2 flex items-center gap-1.5">
+                                                <AlertCircle size={12} /> Melhorias
+                                            </p>
                                             <p className="text-sm text-zinc-300">{analysisResult.pontosMelhoria}</p>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-black/40 rounded-xl border border-[#E81C3E]/20">
-                                        <p className="text-[10px] font-bold text-[#E81C3E] uppercase mb-2">💡 Recomendações Personalizadas</p>
+                                    <div className="p-4 bg-black/40 rounded-xl border border-[#FF236C]/20">
+                                        <p className="text-[10px] font-bold text-[#FF236C] uppercase mb-2 flex items-center gap-1.5">
+                                            <Lightbulb size={12} /> Recomendações Personalizadas
+                                        </p>
                                         <p className="text-sm text-zinc-300">{analysisResult.recomendacoes}</p>
                                     </div>
 
@@ -358,8 +366,8 @@ const CreateProfile: React.FC = () => {
                         className="p-8 rounded-2xl bg-[#040404] border border-zinc-800"
                     >
                         <div className="flex items-start gap-4 mb-8">
-                            <div className="p-3 rounded-xl bg-[#E81C3E]/10">
-                                <Wand2 className="w-6 h-6 text-[#E81C3E]" />
+                            <div className="p-3 rounded-xl bg-[#FF236C]/10">
+                                <Wand2 className="w-6 h-6 text-[#FF236C]" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold">Assistente de Criação</h2>
@@ -373,7 +381,7 @@ const CreateProfile: React.FC = () => {
                                 <React.Fragment key={s}>
                                     <div className={cn(
                                         "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
-                                        step === s ? "bg-[#E81C3E] text-white" : step > s ? "bg-emerald-500 text-white" : "bg-zinc-800 text-zinc-500"
+                                        step === s ? "bg-[#FF236C] text-white" : step > s ? "bg-emerald-500 text-white" : "bg-zinc-800 text-zinc-500"
                                     )}>
                                         {step > s ? <CheckCircle2 size={16} /> : s}
                                     </div>
@@ -389,7 +397,7 @@ const CreateProfile: React.FC = () => {
                                     <input
                                         type="text"
                                         placeholder="Ex: achadinhosdaana"
-                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#E81C3E]"
+                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
                                         value={form.username}
                                         onChange={(e) => setForm({ ...form, username: e.target.value })}
                                     />
@@ -398,7 +406,7 @@ const CreateProfile: React.FC = () => {
                                 <div>
                                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Nicho principal</label>
                                     <select
-                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#E81C3E]"
+                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
                                         value={form.niche}
                                         onChange={(e) => setForm({ ...form, niche: e.target.value })}
                                     >
@@ -416,7 +424,7 @@ const CreateProfile: React.FC = () => {
                                                 onClick={() => setForm({ ...form, audience: a })}
                                                 className={cn(
                                                     "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.audience === a ? "border-[#E81C3E] bg-[#E81C3E]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
+                                                    form.audience === a ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
                                                 )}
                                             >
                                                 {a}
@@ -434,7 +442,7 @@ const CreateProfile: React.FC = () => {
                                                 onClick={() => setForm({ ...form, gender: g })}
                                                 className={cn(
                                                     "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.gender === g ? "border-[#E81C3E] bg-[#E81C3E]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
+                                                    form.gender === g ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
                                                 )}
                                             >
                                                 {g}
@@ -463,7 +471,7 @@ const CreateProfile: React.FC = () => {
                                                 onClick={() => setForm({ ...form, tone: t })}
                                                 className={cn(
                                                     "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.tone === t ? "border-[#E81C3E] bg-[#E81C3E]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
+                                                    form.tone === t ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
                                                 )}
                                             >
                                                 {t}
@@ -481,7 +489,7 @@ const CreateProfile: React.FC = () => {
                                                 onClick={() => setForm({ ...form, frequency: f })}
                                                 className={cn(
                                                     "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.frequency === f ? "border-[#E81C3E] bg-[#E81C3E]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
+                                                    form.frequency === f ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
                                                 )}
                                             >
                                                 {f}
@@ -505,11 +513,11 @@ const CreateProfile: React.FC = () => {
                                                 }}
                                                 className={cn(
                                                     "py-3 rounded-xl border text-sm font-bold transition-all relative",
-                                                    form.contentTypes.includes(c) ? "border-[#E81C3E] bg-[#E81C3E]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
+                                                    form.contentTypes.includes(c) ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
                                                 )}
                                             >
                                                 {c}
-                                                {form.contentTypes.includes(c) && <CheckCircle2 className="absolute top-1 right-1 text-[#E81C3E]" size={12} />}
+                                                {form.contentTypes.includes(c) && <CheckCircle2 className="absolute top-1 right-1 text-[#FF236C]" size={12} />}
                                             </button>
                                         ))}
                                     </div>
@@ -530,7 +538,7 @@ const CreateProfile: React.FC = () => {
                                         <button
                                             onClick={generateProfile}
                                             disabled={isAnalyzing}
-                                            className="w-full py-5 bg-gradient-to-r from-[#E81C3E] to-[#FF236C] text-white font-black italic uppercase tracking-widest rounded-full shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-5 bg-gradient-to-r from-[#FF236C] to-[#FF236C] text-white font-black italic uppercase tracking-widest rounded-full shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                         >
                                             <Wand2 size={24} />
                                             {isAnalyzing ? "Gerando..." : "Gerar Perfil Completo"}
@@ -545,8 +553,8 @@ const CreateProfile: React.FC = () => {
                                                     <ul className="space-y-2">
                                                         {result.usernames.map(u => (
                                                             <li key={u} className="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-zinc-800">
-                                                                <code className="text-[#E81C3E] font-bold">@{u}</code>
-                                                                <button onClick={() => copyToClipboard(`@${u}`)} className="p-1 hover:text-[#E81C3E]"><Copy size={14} /></button>
+                                                                <code className="text-[#FF236C] font-bold">@{u}</code>
+                                                                <button onClick={() => copyToClipboard(`@${u}`)} className="p-1 hover:text-[#FF236C]"><Copy size={14} /></button>
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -556,7 +564,7 @@ const CreateProfile: React.FC = () => {
                                                     <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">Bio Otimizada</p>
                                                     <div className="p-4 rounded-xl bg-black/40 border border-zinc-800 relative">
                                                         <pre className="text-sm whitespace-pre-wrap font-sans text-white">{result.bio}</pre>
-                                                        <button onClick={() => copyToClipboard(result.bio)} className="absolute top-2 right-2 p-1 hover:text-[#E81C3E]"><Copy size={16} /></button>
+                                                        <button onClick={() => copyToClipboard(result.bio)} className="absolute top-2 right-2 p-1 hover:text-[#FF236C]"><Copy size={16} /></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -565,12 +573,12 @@ const CreateProfile: React.FC = () => {
                                                 <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
                                                     <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">Foto de Perfil Sugerida</p>
                                                     <p className="text-sm text-zinc-300 mb-4">{result.photoDesc}</p>
-                                                    <div className="p-4 rounded-xl bg-black border border-[#E81C3E]/20 space-y-3">
+                                                    <div className="p-4 rounded-xl bg-black border border-[#FF236C]/20 space-y-3">
                                                         <p className="text-xs text-zinc-500">Prompt para Grok/DALL-E:</p>
-                                                        <p className="text-xs font-mono text-[#E81C3E]">{result.prompt}</p>
+                                                        <p className="text-xs font-mono text-[#FF236C]">{result.prompt}</p>
                                                         <button
                                                             onClick={() => window.open(`https://grok.com?q=${encodeURIComponent('Create a profile picture: ' + result.prompt)}`, '_blank')}
-                                                            className="w-full py-3 bg-[#E81C3E] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2"
+                                                            className="w-full py-3 bg-[#FF236C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2"
                                                         >
                                                             Criar avatar no Grok <ChevronRight size={14} />
                                                         </button>
@@ -597,7 +605,7 @@ const CreateProfile: React.FC = () => {
 
                                         <div className="flex gap-4">
                                             <button onClick={() => { setResult(null); setStep(1); }} className="flex-1 py-4 bg-zinc-900 text-white font-bold rounded-full">Recomeçar</button>
-                                            <button onClick={() => copyToClipboard(`Perfil TikTok Shop\n\nBio:\n${result.bio}\n\nIdeias de Conteúdo:\n${result.videos.join('\n')}`)} className="flex-[2] py-4 bg-[#E81C3E] text-white font-bold rounded-full">Copiar Tudo</button>
+                                            <button onClick={() => copyToClipboard(`Perfil TikTok Shop\n\nBio:\n${result.bio}\n\nIdeias de Conteúdo:\n${result.videos.join('\n')}`)} className="flex-[2] py-4 bg-[#FF236C] text-white font-bold rounded-full">Copiar Tudo</button>
                                         </div>
                                     </div>
                                 )}

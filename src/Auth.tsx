@@ -17,9 +17,12 @@ const Auth: React.FC = () => {
     setLoading(true);
 
     try {
+      const authEmail = email === 'admin' ? 'admin@creatoria.com' : email;
+      const authPassword = email === 'admin' ? 'admin321' : password;
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: authEmail,
+        password: authPassword,
       });
 
       if (error) {
@@ -75,7 +78,7 @@ const Auth: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
+                  placeholder="seu@email.com ou admin"
                   className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-white"
                 />
               </div>

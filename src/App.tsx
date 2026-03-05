@@ -9,6 +9,8 @@ import MyPrompts from './MyPrompts';
 import Settings from './Settings';
 import CreateProfile from './CreateProfile';
 import Auth from './Auth';
+import { Academy } from './Academy';
+import { ViralCreator } from './ViralCreator';
 
 const AppContent: React.FC = () => {
   const { user } = useApp();
@@ -26,6 +28,8 @@ const AppContent: React.FC = () => {
       case 'creator-lab': return <CreatorLab />;
       case 'sync-editor': return <SyncEditor />;
       case 'my-prompts': return <MyPrompts />;
+      case 'viral-creator': return <ViralCreator />;
+      case 'academy': return <Academy />;
       case 'settings': return <Settings />;
       default: return <Dashboard />;
     }

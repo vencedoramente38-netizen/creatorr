@@ -150,7 +150,7 @@ const Radar: React.FC = () => {
             className="group relative bg-[#09090B] border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-all hover:shadow-2xl hover:shadow-primary/5"
           >
             {/* Image Section */}
-            <div className="relative aspect-square overflow-hidden">
+            <div className="relative aspect-video sm:aspect-square overflow-hidden">
               <img
                 src={product.imageUrl}
                 alt={product.name}

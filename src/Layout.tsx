@@ -16,7 +16,10 @@ import {
   User,
   LogOut,
   Check,
-  UserCircle2
+  UserCircle2,
+  GraduationCap,
+  Zap,
+  Rocket
 } from 'lucide-react';
 import { Meteors } from './components/ui/meteors';
 import { Popover, PopoverTrigger, PopoverContent, PopoverBody, PopoverHeader, PopoverTitle } from './components/ui/popover';
@@ -48,6 +51,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'criar-perfil', label: 'Criar Perfil', icon: UserCircle2 },
     { id: 'creator-lab', label: 'Creator Lab', icon: FlaskConical },
     { id: 'sync-editor', label: 'Sync Editor', icon: Video },
+    { id: 'viral-creator', label: 'Viral Creator', icon: Rocket },
+    { id: 'academy', label: 'Academy', icon: GraduationCap },
     { id: 'my-prompts', label: 'Meus Prompts', icon: FileText },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
@@ -190,21 +195,13 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 relative z-10">
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-          <Meteors number={50} />
+          <Meteors number={100} className="fixed inset-0 w-full h-full" />
         </div>
         <div className="relative z-10 flex flex-col h-full">
           {/* Header */}
           <header className="h-16 border-b border-zinc-800 bg-[#09090B]/50 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-20">
-            <div className="lg:hidden flex items-center gap-3">
-              <img
-                src="https://i.postimg.cc/PrhMFyd6/1771503918895-019c75de-cef9-759f-b38e-636f7ae1437a-removebg-preview.png"
-                alt="Creatoria Logo"
-                className="w-8 h-8 object-contain"
-              />
-              <span className="font-bold text-lg">Creatoria</span>
-            </div>
-            <div className="hidden lg:block">
-              <h2 className="text-sm font-medium text-zinc-400">Bem-vindo de volta, <span className="text-white">{profile.name}</span></h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-medium text-zinc-400">Olá, <span className="text-white">{profile.name.split(' ')[0]}</span></h2>
             </div>
 
             <div className="flex items-center gap-4">
@@ -220,7 +217,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                     )}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 p-0 bg-[#09090B] border-zinc-800 shadow-2xl">
+                <PopoverContent align="end" className="w-[calc(100vw-32px)] sm:w-80 p-0 bg-[#09090B] border-zinc-800 shadow-2xl">
                   <PopoverHeader className="flex flex-row items-center justify-between border-b border-zinc-800 px-4 py-3">
                     <PopoverTitle className="text-sm font-bold">Notificações</PopoverTitle>
                     <button
@@ -315,9 +312,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           {/* Mobile Floating Menu Button */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
-            className="fixed bottom-6 left-4 z-50 flex lg:hidden h-12 w-12 items-center justify-center rounded-full bg-white shadow-2xl text-black hover:scale-110 active:scale-95 transition-all"
+            className="fixed bottom-6 right-6 z-[60] flex lg:hidden h-14 w-14 items-center justify-center rounded-full bg-primary shadow-[0_0_30px_rgba(255,35,108,0.5)] text-white hover:scale-110 active:scale-95 transition-all animate-bounce-subtle"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-7 w-7" />
           </button>
         </div>
       </main>
