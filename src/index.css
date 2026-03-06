@@ -28,9 +28,9 @@
   --card-foreground: #fafafa;
   --popover: #0D0D0D;
   --popover-foreground: #fafafa;
-  --primary: #FF236C;
-  --primary-foreground: #fafafa;
-  --secondary: #27272a;
+  --primary: #DEDEDE;
+  --primary-foreground: #050505;
+  --secondary: #141414;
   --secondary-foreground: #fafafa;
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
@@ -40,7 +40,7 @@
   --destructive-foreground: #fafafa;
   --border: #27272a;
   --input: #27272a;
-  --ring: #FF236C;
+  --ring: #DEDEDE;
   --radius: 0.5rem;
 }
 
@@ -52,15 +52,16 @@ html {
 }
 
 .glow-tiktok {
-  box-shadow: 0 0 15px rgba(255, 35, 108, 0.3), 0 0 15px rgba(255, 35, 108, 0.3);
+  box-shadow: 0 0 15px rgba(214, 214, 214, 0.2);
 }
 
 .border-tiktok {
-  border-image: linear-gradient(to right, #FF236C, #FF236C) 1;
+  border-image: linear-gradient(to right, #DEDEDE, #DEDEDE) 1;
 }
 
 .bg-tiktok-gradient {
-  background: linear-gradient(135deg, #FF236C 0%, #FF236C 100%);
+  background: #DEDEDE;
+  color: #050505;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

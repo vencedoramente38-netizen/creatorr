@@ -1,30 +1,48 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useApp } from './AppContext';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-    UserCircle2,
-    Search,
-    Wand2,
-    Crown,
-    UserCircle,
-    BarChart2,
-    Tag,
-    Camera,
-    Upload,
-    Sparkles,
-    Copy,
-    CheckCircle2,
-    X,
-    ChevronRight,
-    TrendingUp,
-    Target,
-    Zap,
-    AlertCircle,
-    Lightbulb
-} from 'lucide-react';
-import { cn } from './lib/utils';
 import { useDropzone } from 'react-dropzone';
 import confetti from 'canvas-confetti';
+
+const Icon: React.FC<{ name: string; size?: number; className?: string; style?: React.CSSProperties }> = ({ name, size = 24, style }) => {
+    const icons: Record<string, React.ReactNode> = {
+        userCircle2: <React.Fragment><circle cx="12" cy="12" r="10" /><circle cx="12" cy="10" r="3" /><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" /></React.Fragment>,
+        search: <React.Fragment><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></React.Fragment>,
+        wand2: <React.Fragment><path d="m15 5 4 4" /><path d="M13 7 8.7 2.7a2 2 0 0 0-2.8 0L3.3 5.3a2 2 0 0 0 0 2.8L7.6 12.4l4.7-4.7" /><path d="m18 14 3 3" /><path d="m15 11 3 3" /><path d="m11 7 3 3" /><path d="m8 4 3 3" /><path d="m13 18 1 1" /><path d="m10 15 1 1" /><path d="m16 21 1 1" /></React.Fragment>,
+        crown: <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z" />,
+        userCircle: <React.Fragment><circle cx="12" cy="12" r="10" /><circle cx="12" cy="10" r="3" /><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" /></React.Fragment>,
+        barChart2: <React.Fragment><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></React.Fragment>,
+        tag: <React.Fragment><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" /><line x1="7" y1="7" x2="7.01" y2="7" /></React.Fragment>,
+        camera: <React.Fragment><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></React.Fragment>,
+        upload: <React.Fragment><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></React.Fragment>,
+        sparkles: <React.Fragment><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" /></React.Fragment>,
+        copy: <React.Fragment><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></React.Fragment>,
+        checkCircle2: <React.Fragment><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" /><path d="m9 12 2 2 4-4" /></React.Fragment>,
+        x: <React.Fragment><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></React.Fragment>,
+        chevronRight: <polyline points="9 18 15 12 9 6" />,
+        trendingUp: <React.Fragment><path d="m22 7-8.5 8.5-5-5L2 17" /><polyline points="16 7 22 7 22 13" /></React.Fragment>,
+        target: <React.Fragment><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></React.Fragment>,
+        zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+        alertCircle: <React.Fragment><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></React.Fragment>,
+        lightbulb: <React.Fragment><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><line x1="9" y1="18" x2="15" y2="18" /><line x1="10" y1="22" x2="14" y2="22" /></React.Fragment>
+    };
+
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={style}
+        >
+            {icons[name] || null}
+        </svg>
+    );
+};
 
 const NICHES = [
     "Beleza", "Moda", "Casa & Cozinha", "Fitness", "Pets",
@@ -120,7 +138,7 @@ const CreateProfile: React.FC = () => {
                 particleCount: 150,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#FF236C', '#FF236C', '#FFFFFF']
+                colors: ['#DEDEDE', '#DEDEDE', '#FFFFFF']
             });
             addNotification("Sucesso", "Análise concluída!");
         }, 5000);
@@ -137,8 +155,8 @@ const CreateProfile: React.FC = () => {
             setIsAnalyzing(false);
             setResult({
                 usernames: [`${form.username}.shop`, `${form.username}_oficial`, `best_${form.username}`],
-                bio: `✨ O melhor de ${form.form_niche || form.niche}\n📦 Achadinhos testados\n👇 Clique abaixo para conferir!`,
-                photoDesc: "Um avatar minimalista com fundo circular em gradiente vermelho e a primeira letra do nome estilizada em branco.",
+                bio: `✨ O melhor de ${form.niche}\n📦 Achadinhos testados\n👇 Clique abaixo para conferir!`,
+                photoDesc: "Um avatar minimalista com fundo circular em gradiente cinza e a primeira letra do nome estilizada em branco.",
                 videos: [
                     "Unboxing do produto mais vendido do mês",
                     "5 razões pelas quais você precisa disso",
@@ -148,7 +166,7 @@ const CreateProfile: React.FC = () => {
                     "Review sincero: Vale a pena?",
                     "Dica secreta de [Nicho] que ninguém te conta"
                 ],
-                prompt: `Create a professional 3D minimalist avatar for a TikTok Shop account focused on ${form.niche}. Use a red and white color palette.`
+                prompt: `Create a professional 3D minimalist avatar for a TikTok Shop account focused on ${form.niche}. Use a dark gray and white color palette.`
             });
             confetti({
                 particleCount: 150,
@@ -165,31 +183,59 @@ const CreateProfile: React.FC = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto pb-20">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Criar Perfil</h1>
-                <p className="text-zinc-400 mt-1">Ferramentas de IA para otimizar sua presença no TikTok Shop.</p>
+        <div style={{ maxWidth: "896px", marginLeft: "auto", marginRight: "auto", paddingBottom: "80px" }}>
+            <div style={{ marginBottom: "32px" }}>
+                <h1 style={{ fontSize: "30px", fontWeight: 900, fontStyle: "italic", textTransform: "uppercase", letterSpacing: "-0.05em" }}>Criar Perfil</h1>
+                <p style={{ color: "#a1a1aa", marginTop: "4px" }}>Ferramentas de IA para otimizar sua presença no TikTok Shop.</p>
             </div>
 
             {/* Main Tabs */}
-            <div className="flex gap-2 mb-8 bg-[#09090B] p-1 rounded-full border border-zinc-800 w-fit">
+            <div style={{ display: "flex", gap: "8px", marginBottom: "32px", backgroundColor: "#09090B", padding: "4px", borderRadius: "9999px", border: "1px solid #27272a", width: "fit-content" }}>
                 <button
                     onClick={() => setTab('analise')}
-                    className={cn(
-                        "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all",
-                        tab === 'analise' ? "bg-[#FF236C] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
-                    )}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        borderRadius: "9999px",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        transition: "all 0.2s",
+                        backgroundColor: tab === 'analise' ? "#DEDEDE" : "transparent",
+                        color: tab === 'analise' ? "#050505" : "#71717a",
+                        border: "none",
+                        cursor: "pointer",
+                        boxShadow: tab === 'analise' ? "0 10px 15px -3px rgba(222, 222, 222, 0.2)" : "none"
+                    }}
                 >
-                    <Search className="w-4 h-4" /> Análise de Conta
+                    <Icon name="search" size={16} /> Análise de Conta
                 </button>
                 <button
                     onClick={() => setTab('assistente')}
-                    className={cn(
-                        "flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all",
-                        tab === 'assistente' ? "bg-[#FF236C] text-white shadow-lg shadow-red-500/20" : "text-zinc-500 hover:text-white"
-                    )}
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        paddingLeft: "24px",
+                        paddingRight: "24px",
+                        paddingTop: "10px",
+                        paddingBottom: "10px",
+                        borderRadius: "9999px",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        transition: "all 0.2s",
+                        backgroundColor: tab === 'assistente' ? "#DEDEDE" : "transparent",
+                        color: tab === 'assistente' ? "#050505" : "#71717a",
+                        border: "none",
+                        cursor: "pointer",
+                        boxShadow: tab === 'assistente' ? "0 10px 15px -3px rgba(222, 222, 222, 0.2)" : "none"
+                    }}
                 >
-                    <Wand2 className="w-4 h-4" /> Assistente de Criação
+                    <Icon name="wand2" size={16} /> Assistente de Criação
                 </button>
             </div>
 
@@ -200,49 +246,92 @@ const CreateProfile: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 rounded-2xl bg-[#040404] border border-zinc-800"
+                        style={{
+                            padding: "32px",
+                            borderRadius: "24px",
+                            backgroundColor: "#141414",
+                            border: "1px solid #27272a"
+                        }}
                     >
-                        <div className="flex items-start gap-4 mb-8">
-                            <div className="p-3 rounded-xl bg-[#FF236C]/10">
-                                <Crown className="w-6 h-6 text-[#FF236C]" />
+                        <div style={{ display: "flex", alignItems: "start", gap: "16px", marginBottom: "32px" }}>
+                            <div style={{ padding: "12px", borderRadius: "12px", backgroundColor: "rgba(222, 222, 222, 0.1)" }}>
+                                <Icon name="crown" size={24} style={{ color: "#DEDEDE" }} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold">Análise de Conta</h2>
-                                <p className="text-zinc-400 text-sm">Análise inteligente do seu perfil com recomendações personalizadas.</p>
+                                <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>Análise de Conta</h2>
+                                <p style={{ color: "#71717a", fontSize: "14px" }}>Análise inteligente do seu perfil com recomendações personalizadas.</p>
                             </div>
                         </div>
 
                         {/* Sub Tabs */}
-                        <div className="flex gap-2 mb-8">
+                        <div style={{ display: "flex", gap: "8px", marginBottom: "32px" }}>
                             <button
                                 onClick={() => setSubTab('perfil')}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border",
-                                    subTab === 'perfil' ? "bg-zinc-800 border-zinc-700 text-white" : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-800/50"
-                                )}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    paddingLeft: "16px",
+                                    paddingRight: "16px",
+                                    paddingTop: "8px",
+                                    paddingBottom: "8px",
+                                    borderRadius: "12px",
+                                    fontSize: "12px",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s",
+                                    border: subTab === 'perfil' ? "1px solid #3f3f46" : "1px solid transparent",
+                                    backgroundColor: subTab === 'perfil' ? "#27272a" : "transparent",
+                                    color: subTab === 'perfil' ? "white" : "#71717a",
+                                    cursor: "pointer"
+                                }}
                             >
-                                <UserCircle className="w-4 h-4" /> Perfil — Foto, nome, bio
+                                <Icon name="userCircle" size={16} /> Perfil — Foto, nome, bio
                             </button>
                             <button
                                 onClick={() => setSubTab('metricas')}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all border",
-                                    subTab === 'metricas' ? "bg-zinc-800 border-zinc-700 text-white" : "bg-transparent border-transparent text-zinc-500 hover:bg-zinc-800/50"
-                                )}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    paddingLeft: "16px",
+                                    paddingRight: "16px",
+                                    paddingTop: "8px",
+                                    paddingBottom: "8px",
+                                    borderRadius: "12px",
+                                    fontSize: "12px",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s",
+                                    border: subTab === 'metricas' ? "1px solid #3f3f46" : "1px solid transparent",
+                                    backgroundColor: subTab === 'metricas' ? "#27272a" : "transparent",
+                                    color: subTab === 'metricas' ? "white" : "#71717a",
+                                    cursor: "pointer"
+                                }}
                             >
-                                <BarChart2 className="w-4 h-4" /> Métricas — Insights, frequência
+                                <Icon name="barChart2" size={16} /> Métricas — Insights, frequência
                             </button>
                         </div>
 
-                        <div className="space-y-6">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                             <div>
-                                <label className="flex items-center gap-2 text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
-                                    <Tag className="w-3 h-3" /> Selecione seu nicho
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
+                                    <Icon name="tag" size={12} /> Selecione seu nicho
                                 </label>
                                 <select
                                     value={niche}
                                     onChange={(e) => setNiche(e.target.value)}
-                                    className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
+                                    style={{
+                                        width: "100%",
+                                        backgroundColor: "#050505",
+                                        border: "1px solid #27272a",
+                                        borderRadius: "12px",
+                                        paddingLeft: "16px",
+                                        paddingRight: "16px",
+                                        paddingTop: "12px",
+                                        paddingBottom: "12px",
+                                        fontSize: "14px",
+                                        color: "white",
+                                        outline: "none"
+                                    }}
                                 >
                                     <option value="">Escolha o nicho do seu perfil</option>
                                     {NICHES.map(n => <option key={n} value={n}>{n}</option>)}
@@ -250,32 +339,54 @@ const CreateProfile: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="flex items-center gap-2 text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">
-                                    <Camera className="w-3 h-3" /> Screenshot do Perfil
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>
+                                    <Icon name="camera" size={12} /> Screenshot do Perfil
                                 </label>
-                                <p className="text-xs text-zinc-500 mb-4">Faça um print do seu perfil no TikTok mostrando foto, nome, bio e informações visíveis.</p>
+                                <p style={{ fontSize: "12px", color: "#71717a", marginBottom: "16px" }}>Faça um print do seu perfil no TikTok mostrando foto, nome, bio e informações visíveis.</p>
 
                                 {!preview ? (
                                     <div
                                         {...getRootProps()}
-                                        className={cn(
-                                            "border-2 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center cursor-pointer transition-all",
-                                            isDragActive ? "border-[#FF236C] bg-[#FF236C]/5" : "border-zinc-800 hover:border-zinc-700 bg-black/50"
-                                        )}
+                                        style={{
+                                            border: "2px dashed #27272a",
+                                            borderRadius: "16px",
+                                            padding: "48px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s",
+                                            backgroundColor: isDragActive ? "rgba(222, 222, 222, 0.05)" : "rgba(0, 0, 0, 0.5)",
+                                            borderColor: isDragActive ? "#DEDEDE" : "#27272a"
+                                        }}
                                     >
                                         <input {...getInputProps()} />
-                                        <Upload className="w-8 h-8 text-zinc-500 mb-3" />
-                                        <p className="text-zinc-400 text-sm">Clique para enviar a screenshot</p>
-                                        <p className="text-zinc-600 text-xs mt-1">PNG, JPG até 10MB</p>
+                                        <Icon name="upload" size={32} style={{ color: "#71717a", marginBottom: "12px" }} />
+                                        <p style={{ color: "#a1a1aa", fontSize: "14px" }}>Clique para enviar a screenshot</p>
+                                        <p style={{ color: "#52525b", fontSize: "12px", marginTop: "4px" }}>PNG, JPG até 10MB</p>
                                     </div>
                                 ) : (
-                                    <div className="relative rounded-2xl overflow-hidden border border-zinc-800 aspect-video bg-black group">
-                                        <img src={preview} alt="Preview" className="w-full h-full object-contain" />
+                                    <div style={{ position: "relative", borderRadius: "16px", overflow: "hidden", border: "1px solid #27272a", aspectRatio: "16/9", backgroundColor: "black" }}>
+                                        <img src={preview} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                                         <button
                                             onClick={() => setPreview(null)}
-                                            className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-red-500 text-white rounded-full transition-all opacity-0 group-hover:opacity-100"
+                                            style={{
+                                                position: "absolute",
+                                                top: "16px",
+                                                right: "16px",
+                                                padding: "8px",
+                                                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "50%",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s"
+                                            }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#ef4444")}
+                                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.5)")}
                                         >
-                                            <X size={16} />
+                                            <Icon name="x" size={16} />
                                         </button>
                                     </div>
                                 )}
@@ -284,26 +395,41 @@ const CreateProfile: React.FC = () => {
                             <button
                                 onClick={runAnalysis}
                                 disabled={isAnalyzing}
-                                className="w-full py-4 bg-[#FF236C] text-white font-bold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 disabled:opacity-50"
+                                style={{
+                                    width: "100%",
+                                    paddingTop: "16px",
+                                    paddingBottom: "16px",
+                                    backgroundColor: "#DEDEDE",
+                                    color: "#050505",
+                                    fontWeight: "bold",
+                                    borderRadius: "9999px",
+                                    border: "none",
+                                    cursor: isAnalyzing ? "default" : "pointer",
+                                    transition: "all 0.2s",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "8px",
+                                    boxShadow: "0 10px 15px -3px rgba(222, 222, 222, 0.2)",
+                                    opacity: isAnalyzing ? 0.5 : 1
+                                }}
+                                onMouseEnter={(e) => !isAnalyzing && (e.currentTarget.style.transform = "scale(1.02)")}
+                                onMouseLeave={(e) => !isAnalyzing && (e.currentTarget.style.transform = "scale(1)")}
                             >
-                                {isAnalyzing ? (
-                                    <Sparkles className="w-5 h-5 animate-pulse" />
-                                ) : (
-                                    <Sparkles className="w-5 h-5" />
-                                )}
+                                <Icon name="sparkles" size={20} style={{ animation: isAnalyzing ? "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" : "none" }} />
                                 {isAnalyzing ? "Analisando..." : "Analisar minha conta"}
                             </button>
 
                             {isAnalyzing && (
-                                <div className="space-y-3 pt-4">
-                                    <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+                                <div style={{ paddingTop: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    <div style={{ width: "100%", backgroundColor: "#18181b", height: "6px", borderRadius: "9999px", overflow: "hidden" }}>
                                         <motion.div
-                                            className="bg-[#FF236C] h-full"
+                                            style={{ backgroundColor: "#DEDEDE", height: "100%" }}
                                             initial={{ width: 0 }}
                                             animate={{ width: `${analysisProgress}%` }}
                                         />
                                     </div>
-                                    <p className="text-center text-xs font-medium text-zinc-500">
+                                    <p style={{ textAlign: "center", fontSize: "12px", fontWeight: "medium", color: "#71717a" }}>
                                         {analysisPhrases[analysisStep]}
                                     </p>
                                 </div>
@@ -313,45 +439,72 @@ const CreateProfile: React.FC = () => {
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    className="mt-10 p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-6"
+                                    style={{
+                                        marginTop: "40px",
+                                        padding: "24px",
+                                        borderRadius: "24px",
+                                        backgroundColor: "rgba(39, 39, 42, 0.5)",
+                                        border: "1px solid #27272a",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "24px"
+                                    }}
                                 >
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="font-bold flex items-center gap-2">
-                                            <Zap className="w-4 h-4 text-[#FF236C]" /> Resultado da Análise
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                        <h3 style={{ fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <Icon name="zap" size={16} style={{ color: "#DEDEDE" }} /> Resultado da Análise
                                         </h3>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-zinc-500">SCORE:</span>
-                                            <span className="text-2xl font-black text-[#FF236C]">{analysisResult.score}</span>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a" }}>SCORE:</span>
+                                            <span style={{ fontSize: "24px", fontWeight: 900, color: "#DEDEDE" }}>{analysisResult.score}</span>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="p-4 bg-black/40 rounded-xl border border-emerald-500/20">
-                                            <p className="text-[10px] font-bold text-emerald-500 uppercase mb-2 flex items-center gap-1.5">
-                                                <CheckCircle2 size={12} /> Pontos Fortes
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr", mdGridTemplateColumns: "1fr 1fr" as any, gap: "16px" }}>
+                                        <div style={{ padding: "16px", backgroundColor: "rgba(0, 0, 0, 0.4)", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                                            <p style={{ fontSize: "10px", fontWeight: "bold", color: "#10b981", uppercase: "true" as any, marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                                <Icon name="checkCircle2" size={12} /> Pontos Fortes
                                             </p>
-                                            <p className="text-sm text-zinc-300">{analysisResult.pontosFortes}</p>
+                                            <p style={{ fontSize: "14px", color: "#d1d1d6" }}>{analysisResult.pontosFortes}</p>
                                         </div>
-                                        <div className="p-4 bg-black/40 rounded-xl border border-amber-500/20">
-                                            <p className="text-[10px] font-bold text-amber-500 uppercase mb-2 flex items-center gap-1.5">
-                                                <AlertCircle size={12} /> Melhorias
+                                        <div style={{ padding: "16px", backgroundColor: "rgba(0, 0, 0, 0.4)", borderRadius: "12px", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
+                                            <p style={{ fontSize: "10px", fontWeight: "bold", color: "#f59e0b", uppercase: "true" as any, marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                                <Icon name="alertCircle" size={12} /> Melhorias
                                             </p>
-                                            <p className="text-sm text-zinc-300">{analysisResult.pontosMelhoria}</p>
+                                            <p style={{ fontSize: "14px", color: "#d1d1d6" }}>{analysisResult.pontosMelhoria}</p>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-black/40 rounded-xl border border-[#FF236C]/20">
-                                        <p className="text-[10px] font-bold text-[#FF236C] uppercase mb-2 flex items-center gap-1.5">
-                                            <Lightbulb size={12} /> Recomendações Personalizadas
+                                    <div style={{ padding: "16px", backgroundColor: "rgba(0, 0, 0, 0.4)", borderRadius: "12px", border: "1px solid rgba(222, 222, 222, 0.2)" }}>
+                                        <p style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", uppercase: "true" as any, marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                            <Icon name="lightbulb" size={12} /> Recomendações Personalizadas
                                         </p>
-                                        <p className="text-sm text-zinc-300">{analysisResult.recomendacoes}</p>
+                                        <p style={{ fontSize: "14px", color: "#d1d1d6" }}>{analysisResult.recomendacoes}</p>
                                     </div>
 
                                     <button
                                         onClick={() => copyToClipboard(`Score: ${analysisResult.score}\n\nPontos Fortes: ${analysisResult.pontosFortes}\n\nMelhorias: ${analysisResult.pontosMelhoria}\n\nRecomendações: ${analysisResult.recomendacoes}`)}
-                                        className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-sm font-bold transition-all"
+                                        style={{
+                                            width: "100%",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: "8px",
+                                            paddingTop: "12px",
+                                            paddingBottom: "12px",
+                                            backgroundColor: "#27272a",
+                                            color: "white",
+                                            borderRadius: "12px",
+                                            fontSize: "14px",
+                                            fontWeight: "bold",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s"
+                                        }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#3f3f46")}
+                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#27272a")}
                                     >
-                                        <Copy size={16} /> Copiar Análise
+                                        <Icon name="copy" size={16} /> Copiar Análise
                                     </button>
                                 </motion.div>
                             )}
@@ -363,50 +516,94 @@ const CreateProfile: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 rounded-2xl bg-[#040404] border border-zinc-800"
+                        style={{
+                            padding: "32px",
+                            borderRadius: "24px",
+                            backgroundColor: "#141414",
+                            border: "1px solid #27272a"
+                        }}
                     >
-                        <div className="flex items-start gap-4 mb-8">
-                            <div className="p-3 rounded-xl bg-[#FF236C]/10">
-                                <Wand2 className="w-6 h-6 text-[#FF236C]" />
+                        <div style={{ display: "flex", alignItems: "start", gap: "16px", marginBottom: "32px" }}>
+                            <div style={{ padding: "12px", borderRadius: "12px", backgroundColor: "rgba(222, 222, 222, 0.1)" }}>
+                                <Icon name="wand2" size={24} style={{ color: "#DEDEDE" }} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold">Assistente de Criação</h2>
-                                <p className="text-zinc-400 text-sm">Deixa a IA te ajudar a criar um perfil otimizado para vender no TikTok Shop.</p>
+                                <h2 style={{ fontSize: "20px", fontWeight: "bold" }}>Assistente de Criação</h2>
+                                <p style={{ color: "#71717a", fontSize: "14px" }}>Deixa a IA te ajudar a criar um perfil estratégico para vender no TikTok Shop.</p>
                             </div>
                         </div>
 
                         {/* Stepper */}
-                        <div className="flex items-center gap-2 mb-8">
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }}>
                             {[1, 2, 3].map(s => (
                                 <React.Fragment key={s}>
-                                    <div className={cn(
-                                        "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
-                                        step === s ? "bg-[#FF236C] text-white" : step > s ? "bg-emerald-500 text-white" : "bg-zinc-800 text-zinc-500"
-                                    )}>
-                                        {step > s ? <CheckCircle2 size={16} /> : s}
+                                    <div style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "50%",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "12px",
+                                        fontWeight: "bold",
+                                        transition: "all 0.2s",
+                                        backgroundColor: step === s ? "#DEDEDE" : step > s ? "#10b981" : "#27272a",
+                                        color: step === s ? "#050505" : "white"
+                                    }}>
+                                        {step > s ? <Icon name="checkCircle2" size={16} /> : s}
                                     </div>
-                                    {s < 3 && <div className={cn("flex-1 h-px", step > s ? "bg-emerald-500" : "bg-zinc-800")} />}
+                                    {s < 3 && (
+                                        <div style={{
+                                            flex: 1,
+                                            height: "1px",
+                                            backgroundColor: step > s ? "#10b981" : "#27272a"
+                                        }} />
+                                    )}
                                 </React.Fragment>
                             ))}
                         </div>
 
                         {step === 1 && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Nome de usuário desejado</label>
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "8px", display: "block" }}>Nome de usuário desejado</label>
                                     <input
                                         type="text"
                                         placeholder="Ex: achadinhosdaana"
-                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
+                                        style={{
+                                            width: "100%",
+                                            backgroundColor: "#050505",
+                                            border: "1px solid #27272a",
+                                            borderRadius: "12px",
+                                            paddingLeft: "16px",
+                                            paddingRight: "16px",
+                                            paddingTop: "12px",
+                                            paddingBottom: "12px",
+                                            fontSize: "14px",
+                                            color: "white",
+                                            outline: "none"
+                                        }}
                                         value={form.username}
                                         onChange={(e) => setForm({ ...form, username: e.target.value })}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 block">Nicho principal</label>
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "8px", display: "block" }}>Nicho principal</label>
                                     <select
-                                        className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#FF236C]"
+                                        style={{
+                                            width: "100%",
+                                            backgroundColor: "#050505",
+                                            border: "1px solid #27272a",
+                                            borderRadius: "12px",
+                                            paddingLeft: "16px",
+                                            paddingRight: "16px",
+                                            paddingTop: "12px",
+                                            paddingBottom: "12px",
+                                            fontSize: "14px",
+                                            color: "white",
+                                            outline: "none"
+                                        }}
                                         value={form.niche}
                                         onChange={(e) => setForm({ ...form, niche: e.target.value })}
                                     >
@@ -416,16 +613,24 @@ const CreateProfile: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Público-alvo</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px", display: "block" }}>Público-alvo</label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", mdGridTemplateColumns: "repeat(4, 1fr)" as any, gap: "8px" }}>
                                         {AUDIENCES.map(a => (
                                             <button
                                                 key={a}
                                                 onClick={() => setForm({ ...form, audience: a })}
-                                                className={cn(
-                                                    "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.audience === a ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
-                                                )}
+                                                style={{
+                                                    paddingTop: "12px",
+                                                    paddingBottom: "12px",
+                                                    borderRadius: "12px",
+                                                    border: form.audience === a ? "1px solid #DEDEDE" : "1px solid #27272a",
+                                                    fontSize: "14px",
+                                                    fontWeight: "bold",
+                                                    transition: "all 0.2s",
+                                                    backgroundColor: form.audience === a ? "rgba(222, 222, 222, 0.1)" : "rgba(0, 0, 0, 0.4)",
+                                                    color: form.audience === a ? "white" : "#71717a",
+                                                    cursor: "pointer"
+                                                }}
                                             >
                                                 {a}
                                             </button>
@@ -434,16 +639,24 @@ const CreateProfile: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Gênero do criador</label>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px", display: "block" }}>Gênero do criador</label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr", mdGridTemplateColumns: "repeat(3, 1fr)" as any, gap: "8px" }}>
                                         {GENDERS.map(g => (
                                             <button
                                                 key={g}
                                                 onClick={() => setForm({ ...form, gender: g })}
-                                                className={cn(
-                                                    "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.gender === g ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
-                                                )}
+                                                style={{
+                                                    paddingTop: "12px",
+                                                    paddingBottom: "12px",
+                                                    borderRadius: "12px",
+                                                    border: form.gender === g ? "1px solid #DEDEDE" : "1px solid #27272a",
+                                                    fontSize: "14px",
+                                                    fontWeight: "bold",
+                                                    transition: "all 0.2s",
+                                                    backgroundColor: form.gender === g ? "rgba(222, 222, 222, 0.1)" : "rgba(0, 0, 0, 0.4)",
+                                                    color: form.gender === g ? "white" : "#71717a",
+                                                    cursor: "pointer"
+                                                }}
                                             >
                                                 {g}
                                             </button>
@@ -453,26 +666,52 @@ const CreateProfile: React.FC = () => {
 
                                 <button
                                     onClick={() => setStep(2)}
-                                    className="w-full py-4 bg-zinc-800 text-white font-bold rounded-full transition-all flex items-center justify-center gap-2 mt-4"
+                                    style={{
+                                        width: "100%",
+                                        paddingTop: "16px",
+                                        paddingBottom: "16px",
+                                        backgroundColor: "#27272a",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        borderRadius: "9999px",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: "8px",
+                                        marginTop: "16px"
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#3f3f46")}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#27272a")}
                                 >
-                                    Continuar <ChevronRight size={18} />
+                                    Continuar <Icon name="chevronRight" size={18} />
                                 </button>
                             </motion.div>
                         )}
 
                         {step === 2 && (
-                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Tom da conta</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px", display: "block" }}>Tom da conta</label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", mdGridTemplateColumns: "repeat(3, 1fr)" as any, gap: "8px" }}>
                                         {TONES.map(t => (
                                             <button
                                                 key={t}
                                                 onClick={() => setForm({ ...form, tone: t })}
-                                                className={cn(
-                                                    "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.tone === t ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
-                                                )}
+                                                style={{
+                                                    paddingTop: "12px",
+                                                    paddingBottom: "12px",
+                                                    borderRadius: "12px",
+                                                    border: form.tone === t ? "1px solid #DEDEDE" : "1px solid #27272a",
+                                                    fontSize: "14px",
+                                                    fontWeight: "bold",
+                                                    transition: "all 0.2s",
+                                                    backgroundColor: form.tone === t ? "rgba(222, 222, 222, 0.1)" : "rgba(0, 0, 0, 0.4)",
+                                                    color: form.tone === t ? "white" : "#71717a",
+                                                    cursor: "pointer"
+                                                }}
                                             >
                                                 {t}
                                             </button>
@@ -481,16 +720,24 @@ const CreateProfile: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Frequência de posts</label>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px", display: "block" }}>Frequência de posts</label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px" }}>
                                         {FREQUENCIES.map(f => (
                                             <button
                                                 key={f}
                                                 onClick={() => setForm({ ...form, frequency: f })}
-                                                className={cn(
-                                                    "py-3 rounded-xl border text-sm font-bold transition-all",
-                                                    form.frequency === f ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
-                                                )}
+                                                style={{
+                                                    paddingTop: "12px",
+                                                    paddingBottom: "12px",
+                                                    borderRadius: "12px",
+                                                    border: form.frequency === f ? "1px solid #DEDEDE" : "1px solid #27272a",
+                                                    fontSize: "14px",
+                                                    fontWeight: "bold",
+                                                    transition: "all 0.2s",
+                                                    backgroundColor: form.frequency === f ? "rgba(222, 222, 222, 0.1)" : "rgba(0, 0, 0, 0.4)",
+                                                    color: form.frequency === f ? "white" : "#71717a",
+                                                    cursor: "pointer"
+                                                }}
                                             >
                                                 {f}
                                             </button>
@@ -499,8 +746,8 @@ const CreateProfile: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Tipo de conteúdo (Multi-select)</label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <label style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px", display: "block" }}>Tipo de conteúdo (Multi-select)</label>
+                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", mdGridTemplateColumns: "repeat(3, 1fr)" as any, gap: "8px" }}>
                                         {CONTENT_TYPES.map(c => (
                                             <button
                                                 key={c}
@@ -511,101 +758,147 @@ const CreateProfile: React.FC = () => {
                                                     else current.push(c);
                                                     setForm({ ...form, contentTypes: current });
                                                 }}
-                                                className={cn(
-                                                    "py-3 rounded-xl border text-sm font-bold transition-all relative",
-                                                    form.contentTypes.includes(c) ? "border-[#FF236C] bg-[#FF236C]/10 text-white" : "border-zinc-800 bg-black/40 text-zinc-500 hover:border-zinc-700"
-                                                )}
+                                                style={{
+                                                    paddingTop: "12px",
+                                                    paddingBottom: "12px",
+                                                    borderRadius: "12px",
+                                                    border: form.contentTypes.includes(c) ? "1px solid #DEDEDE" : "1px solid #27272a",
+                                                    fontSize: "14px",
+                                                    fontWeight: "bold",
+                                                    transition: "all 0.2s",
+                                                    backgroundColor: form.contentTypes.includes(c) ? "rgba(222, 222, 222, 0.1)" : "rgba(0, 0, 0, 0.4)",
+                                                    color: form.contentTypes.includes(c) ? "white" : "#71717a",
+                                                    cursor: "pointer",
+                                                    position: "relative"
+                                                }}
                                             >
                                                 {c}
-                                                {form.contentTypes.includes(c) && <CheckCircle2 className="absolute top-1 right-1 text-[#FF236C]" size={12} />}
+                                                {form.contentTypes.includes(c) && <Icon name="checkCircle2" size={12} style={{ position: "absolute", top: "4px", right: "4px", color: "#DEDEDE" }} />}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-4 bg-zinc-900 text-white font-bold rounded-full">Voltar</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-4 bg-zinc-800 text-white font-bold rounded-full">Continuar</button>
+                                <div style={{ display: "flex", gap: "16px" }}>
+                                    <button onClick={() => setStep(1)} style={{ flex: 1, paddingTop: "16px", paddingBottom: "16px", backgroundColor: "#09090b", color: "white", fontWeight: "bold", borderRadius: "9999px", border: "1px solid #27272a", cursor: "pointer" }}>Voltar</button>
+                                    <button onClick={() => setStep(3)} style={{ flex: 2, paddingTop: "16px", paddingBottom: "16px", backgroundColor: "#27272a", color: "white", fontWeight: "bold", borderRadius: "9999px", border: "none", cursor: "pointer" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#3f3f46")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#27272a")}>Continuar</button>
                                 </div>
                             </motion.div>
                         )}
 
                         {step === 3 && (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                                 {!result ? (
-                                    <div className="text-center py-10">
-                                        <p className="text-zinc-400 mb-6">Tudo pronto! Pronto para gerar seu perfil estratégico?</p>
+                                    <div style={{ textAlign: "center", paddingTop: "40px", paddingBottom: "40px" }}>
+                                        <p style={{ color: "#71717a", marginBottom: "24px" }}>Tudo pronto! Pronto para gerar seu perfil estratégico?</p>
                                         <button
                                             onClick={generateProfile}
                                             disabled={isAnalyzing}
-                                            className="w-full py-5 bg-gradient-to-r from-[#FF236C] to-[#FF236C] text-white font-black italic uppercase tracking-widest rounded-full shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                            style={{
+                                                width: "100%",
+                                                paddingTop: "20px",
+                                                paddingBottom: "20px",
+                                                backgroundColor: "#DEDEDE",
+                                                color: "#050505",
+                                                fontWeight: 900,
+                                                fontStyle: "italic",
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.1em",
+                                                borderRadius: "9999px",
+                                                border: "none",
+                                                boxShadow: "0 20px 25px -5px rgba(222, 222, 222, 0.1)",
+                                                cursor: isAnalyzing ? "default" : "pointer",
+                                                transition: "all 0.2s",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: "8px",
+                                                opacity: isAnalyzing ? 0.5 : 1
+                                            }}
+                                            onMouseEnter={(e) => !isAnalyzing && (e.currentTarget.style.transform = "scale(1.02)")}
+                                            onMouseLeave={(e) => !isAnalyzing && (e.currentTarget.style.transform = "scale(1)")}
                                         >
-                                            <Wand2 size={24} />
+                                            <Icon name="wand2" size={24} />
                                             {isAnalyzing ? "Gerando..." : "Gerar Perfil Completo"}
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="space-y-4">
-                                                <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
-                                                    <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">Sugestões de Usuário</p>
-                                                    <ul className="space-y-2">
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr", mdGridTemplateColumns: "1fr 1fr" as any, gap: "24px" }}>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                <div style={{ padding: "20px", borderRadius: "24px", backgroundColor: "#1c1c1f", border: "1px solid #27272a" }}>
+                                                    <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "12px" }}>Sugestões de Usuário</p>
+                                                    <ul style={{ display: "flex", flexDirection: "column", gap: "8px", listStyle: "none", padding: 0 }}>
                                                         {result.usernames.map(u => (
-                                                            <li key={u} className="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-zinc-800">
-                                                                <code className="text-[#FF236C] font-bold">@{u}</code>
-                                                                <button onClick={() => copyToClipboard(`@${u}`)} className="p-1 hover:text-[#FF236C]"><Copy size={14} /></button>
+                                                            <li key={u} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px", borderRadius: "8px", backgroundColor: "rgba(0, 0, 0, 0.4)", border: "1px solid #27272a" }}>
+                                                                <code style={{ color: "#DEDEDE", fontWeight: "bold" }}>@{u}</code>
+                                                                <button onClick={() => copyToClipboard(`@${u}`)} style={{ padding: "4px", background: "none", border: "none", color: "#71717a", cursor: "pointer" }}><Icon name="copy" size={14} /></button>
                                                             </li>
                                                         ))}
                                                     </ul>
                                                 </div>
 
-                                                <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
-                                                    <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">Bio Otimizada</p>
-                                                    <div className="p-4 rounded-xl bg-black/40 border border-zinc-800 relative">
-                                                        <pre className="text-sm whitespace-pre-wrap font-sans text-white">{result.bio}</pre>
-                                                        <button onClick={() => copyToClipboard(result.bio)} className="absolute top-2 right-2 p-1 hover:text-[#FF236C]"><Copy size={16} /></button>
+                                                <div style={{ padding: "20px", borderRadius: "24px", backgroundColor: "#1c1c1f", border: "1px solid #27272a" }}>
+                                                    <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "12px" }}>Bio Otimizada</p>
+                                                    <div style={{ position: "relative", padding: "16px", borderRadius: "12px", backgroundColor: "rgba(0, 0, 0, 0.4)", border: "1px solid #27272a" }}>
+                                                        <pre style={{ fontSize: "14px", whiteSpace: "pre-wrap", fontFamily: "inherit", color: "white", margin: 0 }}>{result.bio}</pre>
+                                                        <button onClick={() => copyToClipboard(result.bio)} style={{ position: "absolute", top: "8px", right: "8px", padding: "4px", background: "none", border: "none", color: "#71717a", cursor: "pointer" }}><Icon name="copy" size={16} /></button>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
-                                                <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
-                                                    <p className="text-[10px] font-bold text-zinc-500 uppercase mb-3">Foto de Perfil Sugerida</p>
-                                                    <p className="text-sm text-zinc-300 mb-4">{result.photoDesc}</p>
-                                                    <div className="p-4 rounded-xl bg-black border border-[#FF236C]/20 space-y-3">
-                                                        <p className="text-xs text-zinc-500">Prompt para Grok/DALL-E:</p>
-                                                        <p className="text-xs font-mono text-[#FF236C]">{result.prompt}</p>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                <div style={{ padding: "20px", borderRadius: "24px", backgroundColor: "#1c1c1f", border: "1px solid #27272a" }}>
+                                                    <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "12px" }}>Foto de Perfil Sugerida</p>
+                                                    <p style={{ fontSize: "14px", color: "#d1d1d6", marginBottom: "16px" }}>{result.photoDesc}</p>
+                                                    <div style={{ padding: "16px", borderRadius: "12px", backgroundColor: "black", border: "1px solid rgba(222, 222, 222, 0.2)", display: "flex", flexDirection: "column", gap: "12px" }}>
+                                                        <p style={{ fontSize: "12px", color: "#71717a" }}>Prompt para Grok/DALL-E:</p>
+                                                        <p style={{ fontSize: "12px", fontFamily: "monospace", color: "#DEDEDE" }}>{result.prompt}</p>
                                                         <button
                                                             onClick={() => window.open(`https://grok.com?q=${encodeURIComponent('Create a profile picture: ' + result.prompt)}`, '_blank')}
-                                                            className="w-full py-3 bg-[#FF236C] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2"
+                                                            style={{
+                                                                width: "100%",
+                                                                paddingTop: "12px",
+                                                                paddingBottom: "12px",
+                                                                backgroundColor: "#DEDEDE",
+                                                                color: "#050505",
+                                                                fontSize: "12px",
+                                                                fontWeight: "bold",
+                                                                borderRadius: "12px",
+                                                                border: "none",
+                                                                cursor: "pointer",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                gap: "8px"
+                                                            }}
                                                         >
-                                                            Criar avatar no Grok <ChevronRight size={14} />
+                                                            Criar avatar no Grok <Icon name="chevronRight" size={14} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
-                                            <h3 className="text-md font-bold mb-4 flex items-center gap-2">
-                                                <TrendingUp className="w-4 h-4 text-emerald-500" /> Ideias para os Primeiros 7 Vídeos
+                                        <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#1c1c1f", border: "1px solid #27272a" }}>
+                                            <h3 style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                                                <Icon name="trendingUp" size={16} style={{ color: "#10b981" }} /> Ideias para os Primeiros 7 Vídeos
                                             </h3>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div style={{ display: "grid", gridTemplateColumns: "1fr", smGridTemplateColumns: "1fr 1fr" as any, gap: "12px" }}>
                                                 {result.videos.map((v, i) => (
-                                                    <div key={i} className="flex gap-4 p-3 rounded-xl bg-black border border-zinc-800">
-                                                        <div className="w-6 h-6 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-zinc-400">
+                                                    <div key={i} style={{ display: "flex", gap: "16px", padding: "12px", borderRadius: "12px", backgroundColor: "black", border: "1px solid #27272a" }}>
+                                                        <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#27272a", flexShrink: 0, display: "flex", alignItems: "center", justify: "center" as any, fontSize: "10px", fontWeight: "bold", color: "#71717a" }}>
                                                             {i + 1}
                                                         </div>
-                                                        <p className="text-xs text-zinc-300 font-medium">{v}</p>
+                                                        <p style={{ fontSize: "12px", color: "#d1d1d6", fontWeight: "medium" }}>{v}</p>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-4">
-                                            <button onClick={() => { setResult(null); setStep(1); }} className="flex-1 py-4 bg-zinc-900 text-white font-bold rounded-full">Recomeçar</button>
-                                            <button onClick={() => copyToClipboard(`Perfil TikTok Shop\n\nBio:\n${result.bio}\n\nIdeias de Conteúdo:\n${result.videos.join('\n')}`)} className="flex-[2] py-4 bg-[#FF236C] text-white font-bold rounded-full">Copiar Tudo</button>
+                                        <div style={{ display: "flex", gap: "16px" }}>
+                                            <button onClick={() => { setResult(null); setStep(1); }} style={{ flex: 1, paddingTop: "16px", paddingBottom: "16px", backgroundColor: "#1c1c1f", color: "white", fontWeight: "bold", borderRadius: "9999px", border: "none", cursor: "pointer" }}>Recomeçar</button>
+                                            <button onClick={() => copyToClipboard(`Perfil TikTok Shop\n\nBio:\n${result.bio}\n\nIdeias de Conteúdo:\n${result.videos.join('\n')}`)} style={{ flex: 2, paddingTop: "16px", paddingBottom: "16px", backgroundColor: "#DEDEDE", color: "#050505", fontWeight: "bold", borderRadius: "9999px", border: "none", cursor: "pointer" }}>Copiar Tudo</button>
                                         </div>
                                     </div>
                                 )}

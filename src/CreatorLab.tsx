@@ -1,42 +1,112 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from './AppContext';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  Check,
-  ChevronRight,
-  ChevronLeft,
-  Plus,
-  Camera,
-  User,
-  Mic,
-  Clock,
-  Smile,
-  Volume2,
-  Type,
-  RefreshCw,
-  Copy,
-  Download,
-  ExternalLink,
-  Sparkles,
-  Search,
-  Wand2,
-  FileText,
-  X,
-  ShoppingCart,
-  Clapperboard,
-  Home,
-  Trees,
-  Store,
-  PenTool,
-  Star,
-  Cloud,
-  AlertCircle,
-  Laugh
-} from 'lucide-react';
-import { cn } from './lib/utils';
 import { AVATARS, Product } from './types';
 import { LoadingOverlay } from './components/ui/loading-overlay';
 import confetti from 'canvas-confetti';
+
+const Icon = ({ name, size = 16, ...props }: { name: string, size?: number } & React.SVGProps<SVGSVGElement>) => {
+  const icons: Record<string, React.ReactNode> = {
+    check: <polyline points="20 6 9 17 4 12" />,
+    chevronRight: <polyline points="9 18 15 12 9 6" />,
+    chevronLeft: <polyline points="15 18 9 12 15 6" />,
+    plus: <React.Fragment><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></React.Fragment>,
+    camera: <React.Fragment><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></React.Fragment>,
+    user: <React.Fragment><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></React.Fragment>,
+    mic: <React.Fragment><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></React.Fragment>,
+    clock: <React.Fragment><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></React.Fragment>,
+    smile: <React.Fragment><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></React.Fragment>,
+    volume: <React.Fragment><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" /></React.Fragment>,
+    refresh: <React.Fragment><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></React.Fragment>,
+    copy: <React.Fragment><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></React.Fragment>,
+    download: <React.Fragment><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></React.Fragment>,
+    external: <React.Fragment><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></React.Fragment>,
+    sparkles: <React.Fragment><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z" /><path d="M5 3v4" /><path d="M3 5h4" /><path d="M21 17v4" /><path d="M19 19h4" /></React.Fragment>,
+    wand: <React.Fragment><line x1="18" y1="2" x2="22" y2="6" /><line x1="2" y1="22" x2="16" y2="8" /><path d="M2 2v4h4" /><path d="M18 18v4h4" /><path d="M18 4h.01" /><path d="M22 8h.01" /><path d="M16 2h.01" /><path d="M4 18h.01" /><path d="M8 22h.01" /></React.Fragment>,
+    file: <React.Fragment><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></React.Fragment>,
+    x: <React.Fragment><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></React.Fragment>,
+    star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+    clapperboard: <React.Fragment><path d="M20.2 6 3 11l-.9-2.4 17.2-5z" /><rect x="2" y="8" width="20" height="14" rx="2" /></React.Fragment>,
+    home: <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+    trees: <React.Fragment><path d="M10 22v-6.5" /><path d="M8 22v-4.5" /><path d="M12 22v-3.5" /><path d="M20 22v-5" /><path d="M18 22v-3" /><path d="M16 22v-4" /><path d="M14 22v-3" /><path d="M10 14a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M18 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></React.Fragment>,
+    store: <React.Fragment><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" /><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" /><path d="M2 7h20" /><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7" /></React.Fragment>,
+    pen: <React.Fragment><path d="m11 15 3 3L22 8l-3-3L11 15Z" /><path d="m11 15-3 3h3l8-8-3-3-8 8Z" /><path d="m9 22 2-2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></React.Fragment>,
+    cloud: <path d="M17.5 19c3.037 0 5.5-2.463 5.5-5.5a5.5 5.5 0 0 0-5.5-5.5c-.32 0-.63.027-.93.08a7 7 0 0 0-13.57 2.42A4.5 4.5 0 0 0 1 15.5C1 17.433 2.567 19 4.5 19h13Z" />,
+    alert: <React.Fragment><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></React.Fragment>,
+    laugh: <React.Fragment><circle cx="12" cy="12" r="10" /><path d="M18 13.5c-1 2.5-3 4-6 4s-5-1.5-6-4" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></React.Fragment>,
+    play: <React.Fragment><circle cx="12" cy="12" r="10" /><path d="m10 8 8 4-8 4V8z" /></React.Fragment>,
+    shoppingCart: <React.Fragment><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></React.Fragment>
+  };
+
+  const content = icons[name] || null;
+  if (!content) return null;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      {content}
+    </svg>
+  );
+};
+
+const IphoneMockup = ({ children }: { children: React.ReactNode }) => (
+  <div style={{
+    width: "280px",
+    height: "560px",
+    background: "#141414",
+    borderRadius: "40px",
+    border: "8px solid #27272a",
+    position: "relative",
+    overflow: "hidden",
+    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+    margin: "0 auto",
+    display: "flex",
+    flexDirection: "column"
+  }}>
+    <div style={{
+      position: "absolute",
+      top: 0,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "120px",
+      height: "25px",
+      background: "#27272a",
+      borderBottomLeftRadius: "15px",
+      borderBottomRightRadius: "15px",
+      zIndex: 20
+    }} />
+    <div style={{
+      flex: 1,
+      padding: "20px",
+      paddingTop: "40px",
+      overflowY: "auto",
+      fontSize: "10px",
+      lineHeight: "1.4",
+      color: "#a1a1aa",
+      fontFamily: "monospace",
+      backgroundColor: "#050505"
+    }}>
+      {children}
+    </div>
+    <div style={{
+      height: "5px",
+      width: "80px",
+      background: "#3f3f46",
+      margin: "10px auto",
+      borderRadius: "10px",
+      flexShrink: 0
+    }} />
+  </div>
+);
 
 const CreatorLab: React.FC = () => {
   const { products, favorites, addNotification } = useApp();
@@ -98,7 +168,7 @@ INSTRUÇÕES DE EDIÇÃO:
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#FF236C', '#FF236C', '#ffffff']
+      colors: ['#DEDEDE', '#141414', '#ffffff']
     });
     addNotification("Prompt gerado!", "Seu prompt V03 está pronto para uso.");
   };
@@ -110,7 +180,7 @@ INSTRUÇÕES DE EDIÇÃO:
       particleCount: 40,
       spread: 50,
       origin: { y: 0.8 },
-      colors: ['#FF236C']
+      colors: ['#DEDEDE']
     });
   };
 
@@ -124,106 +194,90 @@ INSTRUÇÕES DE EDIÇÃO:
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto space-y-8 pb-20"
+        style={{ maxWidth: "896px", margin: "0 auto", paddingBottom: "80px" }}
       >
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black italic tracking-tighter uppercase">Resultado Final</h1>
-          <button onClick={() => setResult(null)} className="text-zinc-500 hover:text-white flex items-center gap-2 text-sm font-bold">
-            <RefreshCw size={16} /> Refazer
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
+          <h1 style={{ fontSize: "30px", fontWeight: 900, fontStyle: "italic", letterSpacing: "-0.05em", textTransform: "uppercase", margin: 0 }}>Resultado Final</h1>
+          <button onClick={() => setResult(null)} style={{ color: "#71717a", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", fontWeight: "bold" }}>
+            <Icon name="refresh" size={16} /> Refazer
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-[#09090B] border border-primary/30 flex items-center gap-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Sparkles size={40} className="text-primary" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginBottom: "32px" }}>
+          <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#09090B", border: "1px solid #141414", display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "12px", overflow: "hidden", border: "1px solid #141414" }}>
+              <img src={selectedProduct?.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
-            <div className="w-16 h-16 rounded-xl overflow-hidden border border-zinc-800">
-              <img src={selectedProduct?.imageUrl} alt="" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase">Produto Selecionado</p>
-              <p className="font-bold truncate">{selectedProduct?.name}</p>
-              <button className="text-[10px] font-bold text-primary mt-1 flex items-center gap-1 hover:underline">
-                <Download size={10} /> Baixar imagem
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", margin: 0 }}>Produto Selecionado</p>
+              <p style={{ fontWeight: "bold", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedProduct?.name}</p>
+              <button style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", cursor: "pointer" }}>
+                <Icon name="download" size={10} /> Baixar imagem
               </button>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#09090B] border border-primary/30 flex items-center gap-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-              <User size={40} className="text-primary" />
-            </div>
-            <div className="w-16 h-16 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-800 flex items-center justify-center">
+          <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#09090B", border: "1px solid #141414", display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "12px", overflow: "hidden", border: "1px solid #141414", backgroundColor: "#141414", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {selectedAvatar ? (
-                <img src={selectedAvatar.imageUrl} alt="" className="w-full h-full object-cover" />
+                <img src={selectedAvatar.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <User size={24} className="text-zinc-600" />
+                <Icon name="user" size={24} style={{ color: "#3f3f46" }} />
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase">Avatar do Vídeo</p>
-              <p className="font-bold truncate">{selectedAvatar?.name || 'Nenhum'}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", margin: 0 }}>Avatar do Vídeo</p>
+              <p style={{ fontWeight: "bold", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedAvatar?.name || 'Nenhum'}</p>
               {selectedAvatar && (
-                <button className="text-[10px] font-bold text-primary mt-1 flex items-center gap-1 hover:underline">
-                  <Download size={10} /> Baixar imagem
+                <button style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", cursor: "pointer" }}>
+                  <Icon name="download" size={10} /> Baixar imagem
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <FileText size={20} className="text-primary" />
+        {/* iPhone Mockup Integration */}
+        <div style={{ marginBottom: "32px", textAlign: "center" }}>
+          <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "16px" }}>Preview do Script</p>
+          <IphoneMockup>
+            <div style={{ whiteSpace: "pre-wrap" }}>{result}</div>
+          </IphoneMockup>
+        </div>
+
+        <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <Icon name="file" size={20} style={{ color: "#DEDEDE" }} />
               Prompt Gerado
             </h3>
-            <div className="flex gap-2">
+            <div style={{ display: "flex", gap: "8px" }}>
               <button
-                onClick={() => handleCopy(result)}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-xs font-bold transition-all"
+                onClick={() => handleCopy(result || "")}
+                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#141414", border: "1px solid #27272a", borderRadius: "99px", fontSize: "12px", fontWeight: "bold", color: "white", cursor: "pointer" }}
               >
-                <Copy size={14} /> Copiar
+                <Icon name="copy" size={14} /> Copiar
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-xs font-bold transition-all">
-                <RefreshCw size={14} /> Nova Variação
+              <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#141414", border: "1px solid #27272a", borderRadius: "99px", fontSize: "12px", fontWeight: "bold", color: "white", cursor: "pointer" }}>
+                <Icon name="refresh" size={14} /> Nova Variação
               </button>
             </div>
           </div>
-          <div className="p-4 rounded-2xl bg-black/50 border border-zinc-800 font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap max-h-96 overflow-y-auto">
+          <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "rgba(0,0,0,0.5)", border: "1px solid #141414", fontFamily: "monospace", fontSize: "12px", color: "#d4d4d8", whiteSpace: "pre-wrap", maxHeight: "384px", overflowY: "auto" }}>
             {result}
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <Sparkles size={20} className="text-yellow-500" />
-            Hashtags recomendadas
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {['#tiktokshop', '#achadinhos', '#viral', '#review', '#unboxing', '#tiktokmademebuyit'].map(tag => (
-              <span key={tag} className="px-3 py-1 bg-zinc-800 rounded-full text-xs font-medium text-zinc-300">{tag}</span>
-            ))}
-            <button
-              onClick={() => handleCopy('#tiktokshop #achadinhos #viral #review #unboxing #tiktokmademebuyit')}
-              className="ml-auto text-xs font-bold text-primary hover:underline"
-            >
-              Copiar todas
-            </button>
-          </div>
-        </div>
-
-        <div className="p-8 rounded-3xl bg-tiktok-gradient text-white flex flex-col items-center text-center space-y-4 shadow-2xl shadow-primary/20">
-          <h2 className="text-2xl font-black italic uppercase">Crie o vídeo com IA</h2>
-          <p className="text-sm font-medium opacity-90 max-w-md">
+        <div style={{ padding: "32px", borderRadius: "24px", backgroundColor: "#141414", color: "white", textAlign: "center", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+          <h2 style={{ fontSize: "24px", fontWeight: 900, fontStyle: "italic", textTransform: "uppercase", marginBottom: "16px" }}>Crie o vídeo com IA</h2>
+          <p style={{ fontSize: "14px", fontWeight: "500", opacity: 0.9, maxWidth: "448px", margin: "0 auto 32px" }}>
             Agora que você tem o prompt perfeito, use o Flow VEO3 do Google para gerar o vídeo em alta qualidade.
           </p>
           <button
             onClick={() => window.open('https://labs.google/fx/pt/tools/flow', '_blank')}
-            className="px-8 py-4 bg-white text-black font-black rounded-full flex items-center gap-3 hover:scale-105 transition-all shadow-xl"
+            style={{ padding: "16px 32px", backgroundColor: "#DEDEDE", color: "#050505", fontWeight: 900, border: "none", borderRadius: "99px", display: "inline-flex", alignItems: "center", gap: "12px", cursor: "pointer", transition: "all 0.2s" }}
           >
-            Abrir Flow VEO3 <ExternalLink size={20} />
+            Abrir Flow VEO3 <Icon name="external" size={20} />
           </button>
         </div>
       </motion.div>
@@ -231,27 +285,38 @@ INSTRUÇÕES DE EDIÇÃO:
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Creatoria</h1>
-          <p className="text-zinc-400 mt-1">Crie roteiros e prompts virais otimizados para IA.</p>
-        </div>
+    <div style={{ maxWidth: "896px", margin: "0 auto", paddingBottom: "80px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.0125em" }}>Creatoria</h1>
+            <p style={{ color: "#a1a1aa", marginTop: "4px" }}>Crie roteiros e prompts virais otimizados para IA.</p>
+          </div>
 
-        {/* Stepper */}
-        <div className="flex items-center gap-2">
-          {[1, 2, 3, 4].map((s) => (
-            <React.Fragment key={s}>
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
-                step === s ? "bg-primary text-white shadow-lg shadow-primary/30" :
-                  step > s ? "bg-emerald-500 text-white" : "bg-zinc-800 text-zinc-500"
-              )}>
-                {step > s ? <Check size={14} /> : s}
-              </div>
-              {s < 4 && <div className={cn("w-4 h-px", step > s ? "bg-emerald-500" : "bg-zinc-800")} />}
-            </React.Fragment>
-          ))}
+          {/* Stepper */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {[1, 2, 3, 4].map((s) => (
+              <React.Fragment key={s}>
+                <div style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  transition: "all 0.2s",
+                  backgroundColor: step === s ? "#DEDEDE" : step > s ? "#10b981" : "#141414",
+                  color: step === s ? "#050505" : "white",
+                  boxShadow: step === s ? "0 10px 15px -3px rgba(222, 222, 222, 0.3)" : "none"
+                }}>
+                  {step > s ? <Icon name="check" size={14} /> : s}
+                </div>
+                {s < 4 && <div style={{ width: "16px", height: "1px", backgroundColor: step > s ? "#10b981" : "#141414" }} />}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -265,63 +330,93 @@ INSTRUÇÕES DE EDIÇÃO:
             className="space-y-8"
           >
             {/* Pergunta 1: Produto */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">1</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>1</span>
                 Selecionar um produto
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "16px" }}>
                 {favoriteProducts.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedProductId(p.id)}
-                    className={cn(
-                      "aspect-square rounded-2xl border-2 overflow-hidden relative transition-all group",
-                      selectedProductId === p.id ? "border-primary shadow-lg shadow-primary/20" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      aspectRatio: "1/1",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: selectedProductId === p.id ? "#DEDEDE" : "#141414",
+                      overflow: "hidden",
+                      position: "relative",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      background: "none"
+                    }}
                   >
-                    <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={p.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     {selectedProductId === p.id && (
-                      <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                        <div className="bg-primary rounded-full p-1"><Check size={16} /></div>
+                      <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(222, 222, 222, 0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ backgroundColor: "#DEDEDE", borderRadius: "50%", padding: "4px", color: "#050505" }}><Icon name="check" size={16} /></div>
                       </div>
                     )}
                   </button>
                 ))}
                 <button
-                  className="aspect-square rounded-2xl border-2 border-dashed border-zinc-800 hover:border-zinc-700 flex flex-col items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 transition-all"
+                  style={{
+                    aspectRatio: "1/1",
+                    borderRadius: "16px",
+                    border: "2px dashed #141414",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    color: "#71717a",
+                    background: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
                 >
-                  <Plus size={24} />
-                  <span className="text-[10px] font-bold uppercase">Adicionar</span>
+                  <Icon name="plus" size={24} />
+                  <span style={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase" }}>Adicionar</span>
                 </button>
               </div>
             </div>
 
             {/* Pergunta 2: Cenário */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">2</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>2</span>
                 Cenário do vídeo (opcional)
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "12px", marginBottom: "16px" }}>
                 {[
-                  { id: 'estudio', label: 'Estúdio Profissional', icon: Clapperboard },
-                  { id: 'casa', label: 'Ambiente de Casa', icon: Home },
-                  { id: 'externo', label: 'Ambiente Externo', icon: Trees },
-                  { id: 'loja', label: 'Loja Física', icon: Store },
-                  { id: 'minimalista', label: 'Minimalista', icon: Sparkles },
-                  { id: 'personalizado', label: 'Personalizado', icon: PenTool },
+                  { id: 'estudio', label: 'Estúdio Profissional', icon: 'clapperboard' },
+                  { id: 'casa', label: 'Ambiente de Casa', icon: 'home' },
+                  { id: 'externo', label: 'Ambiente Externo', icon: 'trees' },
+                  { id: 'loja', label: 'Loja Física', icon: 'store' },
+                  { id: 'minimalista', label: 'Minimalista', icon: 'sparkles' },
+                  { id: 'personalizado', label: 'Personalizado', icon: 'pen' },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setScenario(item.id)}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all",
-                      scenario === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "16px",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: scenario === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: scenario === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      color: "white"
+                    }}
                   >
-                    <item.icon size={24} className={scenario === item.id ? "text-primary" : "text-zinc-500"} />
-                    <span className="text-xs font-bold">{item.label}</span>
+                    <Icon name={item.icon} size={24} style={{ color: scenario === item.id ? "#DEDEDE" : "#71717a" }} />
+                    <span style={{ fontSize: "12px", fontWeight: "bold" }}>{item.label}</span>
                   </button>
                 ))}
               </div>
@@ -330,7 +425,17 @@ INSTRUÇÕES DE EDIÇÃO:
                   placeholder="Descreva o cenário desejado..."
                   value={customScenario}
                   onChange={(e) => setCustomScenario(e.target.value)}
-                  className="w-full p-4 bg-black/50 border border-zinc-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  style={{
+                    width: "100%",
+                    padding: "16px",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    border: "1px solid #141414",
+                    borderRadius: "16px",
+                    fontSize: "14px",
+                    color: "white",
+                    outline: "none",
+                    minHeight: "100px"
+                  }}
                 />
               )}
             </div>
@@ -343,77 +448,113 @@ INSTRUÇÕES DE EDIÇÃO:
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
+            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
           >
             {/* Pergunta 1: Estilo de Câmera */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">3</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>3</span>
                 Estilo de câmera
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
                 {[
-                  { id: 'avatar', label: 'Avatar Visual', desc: 'Um personagem digital apresenta o produto.', icon: User },
-                  { id: 'pov', label: 'POV (Ponto de Vista)', desc: 'Visão em primeira pessoa mostrando o uso.', icon: Camera },
+                  { id: 'avatar', label: 'Avatar Visual', desc: 'Um personagem digital apresenta o produto.', icon: 'user' },
+                  { id: 'pov', label: 'POV (Ponto de Vista)', desc: 'Visão em primeira pessoa mostrando o uso.', icon: 'camera' },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setCameraStyle(item.id)}
-                    className={cn(
-                      "p-6 rounded-3xl border-2 flex flex-col items-start gap-3 transition-all text-left group",
-                      cameraStyle === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "24px",
+                      borderRadius: "24px",
+                      border: "2px solid",
+                      borderColor: cameraStyle === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: cameraStyle === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      color: "white"
+                    }}
                   >
-                    <div className={cn(
-                      "p-3 rounded-2xl transition-all",
-                      cameraStyle === item.id ? "bg-primary text-white" : "bg-zinc-800 text-zinc-500 group-hover:text-zinc-300"
-                    )}>
-                      <item.icon size={24} />
+                    <div style={{
+                      padding: "12px",
+                      borderRadius: "16px",
+                      backgroundColor: cameraStyle === item.id ? "#DEDEDE" : "#141414",
+                      color: cameraStyle === item.id ? "#050505" : "#71717a",
+                      display: "flex"
+                    }}>
+                      <Icon name={item.icon} size={24} />
                     </div>
                     <div>
-                      <p className="font-bold">{item.label}</p>
-                      <p className="text-xs text-zinc-500 mt-1">{item.desc}</p>
+                      <p style={{ fontWeight: "bold", margin: 0 }}>{item.label}</p>
+                      <p style={{ fontSize: "12px", color: "#71717a", marginTop: "4px", margin: 0 }}>{item.desc}</p>
                     </div>
-                    {cameraStyle === item.id && <div className="ml-auto bg-primary rounded-full p-1"><Check size={12} /></div>}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Pergunta 2: Avatares */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">4</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>4</span>
                 Escolha um avatar
               </h3>
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "16px" }}>
                 <button
                   onClick={() => setSelectedAvatarId(null)}
-                  className={cn(
-                    "flex-shrink-0 w-24 h-32 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all",
-                    selectedAvatarId === null ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                  )}
+                  style={{
+                    flexShrink: 0,
+                    width: "96px",
+                    height: "128px",
+                    borderRadius: "16px",
+                    border: "2px solid",
+                    borderColor: selectedAvatarId === null ? "#DEDEDE" : "#141414",
+                    backgroundColor: selectedAvatarId === null ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    color: "white"
+                  }}
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-500">
-                    <X size={20} />
+                  <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#141414", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
+                    <Icon name="x" size={20} />
                   </div>
-                  <span className="text-[10px] font-bold uppercase">Nenhum</span>
+                  <span style={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase" }}>Nenhum</span>
                 </button>
                 {AVATARS.map((avatar) => (
                   <button
                     key={avatar.id}
                     onClick={() => setSelectedAvatarId(avatar.id)}
-                    className={cn(
-                      "flex-shrink-0 w-24 h-32 rounded-2xl border-2 overflow-hidden relative transition-all",
-                      selectedAvatarId === avatar.id ? "border-primary shadow-lg shadow-primary/20" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      flexShrink: 0,
+                      width: "96px",
+                      height: "128px",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: selectedAvatarId === avatar.id ? "#DEDEDE" : "#141414",
+                      overflow: "hidden",
+                      position: "relative",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      background: "none"
+                    }}
                   >
-                    <img src={avatar.imageUrl} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1">
-                      <p className="text-[10px] font-bold text-center truncate">{avatar.name}</p>
+                    <img src={avatar.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", padding: "4px" }}>
+                      <p style={{ fontSize: "10px", fontWeight: "bold", color: "white", textAlign: "center", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{avatar.name}</p>
                     </div>
                     {selectedAvatarId === avatar.id && (
-                      <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5"><Check size={10} /></div>
+                      <div style={{ position: "absolute", top: "8px", right: "8px", backgroundColor: "#DEDEDE", borderRadius: "50%", padding: "2px", color: "#050505" }}>
+                        <Icon name="check" size={10} />
+                      </div>
                     )}
                   </button>
                 ))}
@@ -421,12 +562,12 @@ INSTRUÇÕES DE EDIÇÃO:
             </div>
 
             {/* Pergunta 3: Duração */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">5</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>5</span>
                 Duração do vídeo
               </h3>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "12px" }}>
                 {[
                   { id: '8s', label: '1 take', time: '8s' },
                   { id: '16s', label: '2 takes', time: '16s' },
@@ -437,17 +578,27 @@ INSTRUÇÕES DE EDIÇÃO:
                   <button
                     key={item.id}
                     onClick={() => setDuration(item.id)}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 flex flex-col items-center gap-1 transition-all",
-                      duration === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "16px",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: duration === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: duration === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      color: "white"
+                    }}
                   >
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase">{item.label}</span>
-                    <span className="text-sm font-black">{item.time}</span>
+                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>{item.label}</span>
+                    <span style={{ fontSize: "14px", fontWeight: 900 }}>{item.time}</span>
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-zinc-500 italic">* Vídeos mais curtos tendem a ter maior retenção no TikTok.</p>
+              <p style={{ fontSize: "10px", color: "#71717a", fontStyle: "italic", marginTop: "16px" }}>* Vídeos mais curtos tendem a ter maior retenção no TikTok.</p>
             </div>
           </motion.div>
         )}
@@ -458,74 +609,97 @@ INSTRUÇÕES DE EDIÇÃO:
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
+            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
           >
             {/* Pergunta 1: Mood */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">6</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>6</span>
                 Tom da fala
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px" }}>
                 {[
-                  { id: 'animado', label: 'Animado', icon: Star },
-                  { id: 'calmo', label: 'Calmo', icon: Cloud },
-                  { id: 'urgente', label: 'Urgente', icon: AlertCircle },
-                  { id: 'divertido', label: 'Divertido', icon: Laugh },
+                  { id: 'animado', label: 'Animado', icon: 'star' },
+                  { id: 'calmo', label: 'Calmo', icon: 'cloud' },
+                  { id: 'urgente', label: 'Urgente', icon: 'alert' },
+                  { id: 'divertido', label: 'Divertido', icon: 'laugh' },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setMood(item.id)}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all",
-                      mood === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "16px",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: mood === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: mood === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      color: "white"
+                    }}
                   >
-                    <item.icon size={24} className={mood === item.id ? "text-primary" : "text-zinc-500"} />
-                    <span className="text-xs font-bold">{item.label}</span>
+                    <Icon name={item.icon} size={24} style={{ color: mood === item.id ? "#DEDEDE" : "#71717a" }} />
+                    <span style={{ fontSize: "12px", fontWeight: "bold" }}>{item.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Pergunta 2: Voz */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">7</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>7</span>
                 Tipo de voz
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 {[
-                  { id: 'feminina', label: 'Feminina', icon: Volume2 },
-                  { id: 'masculina', label: 'Masculina', icon: Volume2 },
+                  { id: 'feminina', label: 'Feminina', icon: 'volume' },
+                  { id: 'masculina', label: 'Masculina', icon: 'volume' },
                 ].map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setVoiceType(item.id)}
-                    className={cn(
-                      "p-6 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all group",
-                      voiceType === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "24px",
+                      borderRadius: "24px",
+                      border: "2px solid",
+                      borderColor: voiceType === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: voiceType === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "12px",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      color: "white"
+                    }}
                   >
-                    <div className={cn(
-                      "p-3 rounded-2xl transition-all",
-                      voiceType === item.id ? "bg-primary text-white" : "bg-zinc-800 text-zinc-500"
-                    )}>
-                      <item.icon size={24} />
+                    <div style={{
+                      padding: "12px",
+                      borderRadius: "16px",
+                      backgroundColor: voiceType === item.id ? "#DEDEDE" : "#141414",
+                      color: voiceType === item.id ? "#050505" : "#71717a",
+                      display: "flex"
+                    }}>
+                      <Icon name={item.icon} size={24} />
                     </div>
-                    <span className="font-bold">{item.label}</span>
+                    <span style={{ fontWeight: "bold" }}>{item.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Pergunta 3: Tonalidade */}
-            <div className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs">8</span>
+            <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>8</span>
                 Tonalidade da voz
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "12px" }}>
                 {[
                   { id: 'grave', label: 'Grave' },
                   { id: 'medio', label: 'Médio' },
@@ -537,10 +711,18 @@ INSTRUÇÕES DE EDIÇÃO:
                   <button
                     key={item.id}
                     onClick={() => setTonality(item.id)}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 transition-all text-xs font-bold",
-                      tonality === item.id ? "border-primary bg-primary/5" : "border-zinc-800 hover:border-zinc-700"
-                    )}
+                    style={{
+                      padding: "16px",
+                      borderRadius: "16px",
+                      border: "2px solid",
+                      borderColor: tonality === item.id ? "#DEDEDE" : "#141414",
+                      backgroundColor: tonality === item.id ? "rgba(222, 222, 222, 0.05)" : "transparent",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      transition: "all 0.2s",
+                      cursor: "pointer",
+                      color: "white"
+                    }}
                   >
                     {item.label}
                   </button>
@@ -556,35 +738,35 @@ INSTRUÇÕES DE EDIÇÃO:
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
+            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
           >
-            <div className="p-8 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-6">
-              <h3 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-                <Check size={28} className="text-emerald-500" />
+            <div style={{ padding: "32px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
+              <h3 style={{ fontSize: "24px", fontWeight: 900, fontStyle: "italic", textTransform: "uppercase", letterSpacing: "-0.05em", display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+                <Icon name="check" size={28} style={{ color: "#10b981" }} />
                 Revisão Final
               </h3>
 
-              <div className="space-y-4">
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                 {[
-                  { label: 'Produto', value: selectedProduct?.name || 'Não selecionado', icon: ShoppingCart },
-                  { label: 'Cenário', value: scenario === 'personalizado' ? customScenario : scenario, icon: Camera },
-                  { label: 'Estilo', value: cameraStyle === 'avatar' ? 'Avatar Visual' : 'POV', icon: Camera },
-                  { label: 'Avatar', value: selectedAvatar?.name || 'Nenhum', icon: User },
-                  { label: 'Duração', value: duration, icon: Clock },
-                  { label: 'Mood', value: mood, icon: Smile },
-                  { label: 'Voz', value: `${voiceType} (${tonality})`, icon: Volume2 },
+                  { label: 'Produto', value: selectedProduct?.name || 'Não selecionado', icon: 'shoppingCart' },
+                  { label: 'Cenário', value: scenario === 'personalizado' ? customScenario : scenario, icon: 'camera' },
+                  { label: 'Estilo', value: cameraStyle === 'avatar' ? 'Avatar Visual' : 'POV', icon: 'camera' },
+                  { label: 'Avatar', value: selectedAvatar?.name || 'Nenhum', icon: 'user' },
+                  { label: 'Duração', value: duration, icon: 'clock' },
+                  { label: 'Mood', value: mood, icon: 'smile' },
+                  { label: 'Voz', value: `${voiceType} (${tonality})`, icon: 'volume' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-zinc-800/50 group">
-                    <div className="flex items-center gap-3">
-                      <item.icon size={18} className="text-zinc-500" />
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: "16px", backgroundColor: "#050505", border: "1px solid #141414" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <Icon name={item.icon} size={18} style={{ color: "#71717a" }} />
                       <div>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase">{item.label}</p>
-                        <p className="text-sm font-bold text-zinc-200 truncate max-w-[200px] sm:max-w-md">{item.value}</p>
+                        <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", margin: 0 }}>{item.label}</p>
+                        <p style={{ fontSize: "14px", fontWeight: "bold", color: "#e4e4e7", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>{item.value}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setStep(i < 2 ? 1 : i < 5 ? 2 : 3)}
-                      className="text-[10px] font-bold text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", background: "none", border: "none", cursor: "pointer" }}
                     >
                       Editar
                     </button>
@@ -595,40 +777,78 @@ INSTRUÇÕES DE EDIÇÃO:
               <button
                 onClick={handleGeneratePrompt}
                 disabled={!selectedProductId}
-                className={cn(
-                  "w-full py-5 rounded-3xl font-black italic uppercase text-xl tracking-widest transition-all flex items-center justify-center gap-3 shadow-2xl",
-                  selectedProductId
-                    ? "bg-tiktok-gradient text-white shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
-                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
-                )}
+                style={{
+                  width: "100%",
+                  padding: "20px",
+                  borderRadius: "24px",
+                  fontWeight: 900,
+                  fontStyle: "italic",
+                  textTransform: "uppercase",
+                  fontSize: "20px",
+                  letterSpacing: "0.05em",
+                  border: "none",
+                  cursor: selectedProductId ? "pointer" : "not-allowed",
+                  transition: "all 0.2s",
+                  backgroundColor: selectedProductId ? "#DEDEDE" : "#141414",
+                  color: selectedProductId ? "#050505" : "#71717a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "12px",
+                  boxShadow: selectedProductId ? "0 25px 50px -12px rgba(222, 222, 222, 0.2)" : "none"
+                }}
               >
-                Gerar Prompt V03 <Wand2 size={24} />
+                Gerar Prompt V03 <Icon name="wand" size={24} />
               </button>
-              {!selectedProductId && <p className="text-center text-xs text-red-500 font-bold">Selecione um produto para continuar.</p>}
+              {!selectedProductId && <p style={{ textAlign: "center", fontSize: "12px", color: "#ef4444", fontWeight: "bold", marginTop: "12px" }}>Selecione um produto para continuar.</p>}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="flex items-center justify-between pt-4">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "16px" }}>
         <button
           onClick={prevStep}
           disabled={step === 1}
-          className={cn(
-            "px-6 py-3 rounded-full font-bold flex items-center gap-2 transition-all",
-            step === 1 ? "opacity-0 pointer-events-none" : "bg-zinc-800 text-white hover:bg-zinc-700"
-          )}
+          style={{
+            padding: "12px 24px",
+            borderRadius: "99px",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            backgroundColor: "#141414",
+            color: "white",
+            opacity: step === 1 ? 0 : 1,
+            pointerEvents: step === 1 ? "none" : "auto"
+          }}
         >
-          <ChevronLeft size={20} /> Voltar
+          <Icon name="chevronLeft" size={20} /> Voltar
         </button>
 
         {step < 4 && (
           <button
             onClick={nextStep}
-            className="px-8 py-3 bg-white text-black rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-xl"
+            style={{
+              padding: "12px 32px",
+              borderRadius: "99px",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              border: "none",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              backgroundColor: "#DEDEDE",
+              color: "#050505",
+              boxShadow: "0 10px 15px -3px rgba(222, 222, 222, 0.2)"
+            }}
           >
-            Próximo <ChevronRight size={20} />
+            Próximo <Icon name="chevronRight" size={20} />
           </button>
         )}
       </div>

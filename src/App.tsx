@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './AppContext';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
@@ -15,6 +15,18 @@ import { ViralCreator } from './ViralCreator';
 const AppContent: React.FC = () => {
   const { user } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  useEffect(() => {
+    // Favicon
+    const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement || document.createElement("link");
+    link.type = "image/jpeg";
+    link.rel = "shortcut icon";
+    link.href = "https://i.postimg.cc/rwwB300w/image.jpg";
+    document.head.appendChild(link);
+
+    // Título da aba
+    document.title = "CreatorAI Pro";
+  }, []);
 
   if (!user) {
     return <Auth />;
