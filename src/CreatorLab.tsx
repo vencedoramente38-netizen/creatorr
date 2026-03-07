@@ -237,13 +237,6 @@ INSTRUÇÕES DE EDIÇÃO:
           </div>
         </div>
 
-        {/* iPhone Mockup Integration */}
-        <div style={{ marginBottom: "32px", textAlign: "center" }}>
-          <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "16px" }}>Preview do Script</p>
-          <IphoneMockup>
-            <div style={{ whiteSpace: "pre-wrap" }}>{result}</div>
-          </IphoneMockup>
-        </div>
 
         <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
@@ -777,6 +770,7 @@ INSTRUÇÕES DE EDIÇÃO:
               <button
                 onClick={handleGeneratePrompt}
                 disabled={!selectedProductId}
+                className="rainbow-btn"
                 style={{
                   width: "100%",
                   padding: "20px",
@@ -786,19 +780,14 @@ INSTRUÇÕES DE EDIÇÃO:
                   textTransform: "uppercase",
                   fontSize: "20px",
                   letterSpacing: "0.05em",
-                  border: "none",
-                  cursor: selectedProductId ? "pointer" : "not-allowed",
-                  transition: "all 0.2s",
-                  backgroundColor: selectedProductId ? "#DEDEDE" : "#141414",
-                  color: selectedProductId ? "#050505" : "#71717a",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "12px",
-                  boxShadow: selectedProductId ? "0 25px 50px -12px rgba(222, 222, 222, 0.2)" : "none"
+                  minWidth: "unset",
                 }}
               >
-                Gerar Prompt V03 <Icon name="wand" size={24} />
+                Gerar Roteiro <Icon name="wand" size={24} />
               </button>
               {!selectedProductId && <p style={{ textAlign: "center", fontSize: "12px", color: "#ef4444", fontWeight: "bold", marginTop: "12px" }}>Selecione um produto para continuar.</p>}
             </div>
@@ -831,7 +820,9 @@ INSTRUÇÕES DE EDIÇÃO:
         </button>
 
         {step < 4 && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(222, 222, 222, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
             onClick={nextStep}
             style={{
               padding: "12px 32px",
@@ -842,14 +833,13 @@ INSTRUÇÕES DE EDIÇÃO:
               gap: "8px",
               border: "none",
               cursor: "pointer",
-              transition: "all 0.2s",
+              transition: "all 0.3s ease",
               backgroundColor: "#DEDEDE",
-              color: "#050505",
-              boxShadow: "0 10px 15px -3px rgba(222, 222, 222, 0.2)"
+              color: "#050505"
             }}
           >
             Próximo <Icon name="chevronRight" size={20} />
-          </button>
+          </motion.button>
         )}
       </div>
     </div>
