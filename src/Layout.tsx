@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from './AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverTitle } from './components/ui/popover';
+import { STOR } from './lib/supabase';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -57,7 +58,7 @@ const SideIcon = ({ type }: { type: string }) => {
 };
 
 // MagicUI-style Meteor Shower (white meteors)
-const MeteorShower = () => {
+export const MeteorShower = () => {
   const [meteors, setMeteors] = useState<Array<{ id: number; top: string; left: string; delay: string; duration: string }>>([]);
   useEffect(() => {
     const generated = Array.from({ length: 30 }, (_, i) => ({
@@ -102,7 +103,7 @@ const MeteorShower = () => {
 };
 
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) => {
-  const { profile, notifications, markAllAsRead, setUser } = useApp();
+  const { profile, notifications, markAllAsRead, setUser, user } = useApp();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
     return saved ? JSON.parse(saved) : false;
@@ -132,17 +133,16 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
     { id: 'criar-perfil', label: 'Criar Perfil' },
     { id: 'creator-lab', label: 'Creator Lab' },
     { id: 'creator-editor', label: 'Creator Editor' },
-    { id: 'viral-creator', label: 'Viral Creator' },
+    { id: 'viral-creator', label: 'Viral Boost' },
     { id: 'academy', label: 'Academy' },
-    { id: 'admin', label: 'Admin' },
     { id: 'settings', label: 'Configurações' },
   ];
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await STOR.s("session", null);
     setUser(null);
-    localStorage.removeItem('creator_lab_user');
   };
 
   return (
@@ -153,11 +153,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         <div
           onClick={() => setSidebarOpen(false)}
           style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            zIndex: 49,
-            backdropFilter: "blur(2px)",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+            zIndex: 49, backdropFilter: "blur(2px)",
           }}
         />
       )}
@@ -167,27 +164,36 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
         initial={false}
         animate={{ width: isMobile ? 220 : (sidebarCollapsed ? 80 : 260) }}
         style={{
-          width: 220,
-          background: "rgba(5,5,5,0.97)",
-          backdropFilter: "blur(20px)",
-          borderRight: "1px solid rgba(255,255,255,.07)",
-          display: "flex",
-          flexDirection: "column",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          height: "100vh",
-          zIndex: 50,
+          width: 220, background: "rgba(5,5,5,0.97)",
+          backdropFilter: "blur(20px)", borderRight: "1px solid rgba(255,255,255,.07)",
+          display: "flex", flexDirection: "column", position: "fixed",
+          top: 0, left: 0, height: "100vh", zIndex: 50,
           transform: isMobile ? (sidebarOpen ? "translateX(0)" : "translateX(-100%)") : "translateX(0)",
           transition: "transform 0.3s ease",
         }}
       >
-        <div style={{ padding: "24px", display: "flex", alignItems: "center", gap: "12px", overflow: "hidden" }}>
-          <img src="https://i.postimg.cc/Ghyb70wM/image-removebg-preview.png" alt="Creatoria Logo" style={{ width: "40px", height: "40px", objectFit: "contain", flexShrink: 0 }} />
-          {(!sidebarCollapsed || isMobile) && (
-            <span style={{ fontWeight: "bold", fontSize: "20px", letterSpacing: "-0.025em", color: "#DEDEDE", whiteSpace: "nowrap" }}>
-              Creatoria
-            </span>
+        <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "12px", overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img src="https://i.postimg.cc/Ghyb70wM/image-removebg-preview.png" alt="Creatoria Logo" style={{ width: "40px", height: "40px", objectFit: "contain", flexShrink: 0 }} />
+            {(!sidebarCollapsed || isMobile) && (
+              <span style={{ fontWeight: "bold", fontSize: "20px", letterSpacing: "-0.025em", color: "#DEDEDE", whiteSpace: "nowrap" }}>
+                Creatoria
+              </span>
+            )}
+          </div>
+
+          {user && (!sidebarCollapsed || isMobile) && (
+            <div style={{ marginTop: "8px", background: "rgba(255,255,255,0.03)", padding: "12px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <div style={{ fontSize: "14px", fontWeight: "bold", color: "#e4e4e7" }}>{user.name}</div>
+              <div style={{ fontSize: "12px", color: "#71717a" }}>{user.email}</div>
+              <div style={{ marginTop: 4 }}>
+                {user.plan_type === "lifetime" ? (
+                  <span style={{ fontSize: 10, padding: "4px 8px", borderRadius: 20, background: "rgba(168,85,247,0.15)", color: "#a855f7", fontWeight: "bold" }}>Vitalício ♾️</span>
+                ) : (
+                  <span style={{ fontSize: 10, padding: "4px 8px", borderRadius: 20, background: "rgba(6,182,212,0.15)", color: "#06b6d4", fontWeight: "bold" }}>Mensal</span>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
@@ -197,30 +203,40 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           </button>
         )}
 
-        <nav style={{ flex: 1, padding: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
-          {menuItems.map((item) => (
-            <button key={item.id} onClick={() => {
-              setActiveTab(item.id);
-              if (isMobile) setSidebarOpen(false);
-            }} style={{
-              width: "100%", display: "flex", alignItems: "center", gap: "12px",
-              padding: "12px", borderRadius: "12px", transition: "all 0.2s",
-              border: "none", cursor: "pointer", position: "relative",
-              background: activeTab === item.id ? "rgba(222, 222, 222, 0.07)" : "transparent",
-              color: activeTab === item.id ? "white" : "#a1a1aa",
-              borderLeft: activeTab === item.id ? "3px solid #DEDEDE" : "3px solid transparent",
-              textAlign: "left", fontFamily: "inherit",
-            }}>
-              <SideIcon type={item.id} />
-              {(!sidebarCollapsed || isMobile) && <span style={{ fontWeight: 500, whiteSpace: "nowrap" }}>{item.label}</span>}
-            </button>
-          ))}
+        <nav style={{ flex: 1, padding: "12px", display: "flex", flexDirection: "column", gap: "4px", overflowY: "auto" }}>
+          {menuItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button key={item.id} onClick={() => {
+                setActiveTab(item.id);
+                if (isMobile) setSidebarOpen(false);
+              }} style={{
+                width: "100%", display: "flex", alignItems: "center", gap: "12px",
+                padding: "12px", borderRadius: "12px", transition: "all 0.2s",
+                border: "none", cursor: "pointer", position: "relative",
+                background: isActive ? "rgba(222, 222, 222, 0.07)" : "transparent",
+                color: isActive ? "white" : "#a1a1aa",
+                borderLeft: isActive ? "3px solid #DEDEDE" : "3px solid transparent",
+                textAlign: "left", fontFamily: "inherit",
+              }}>
+                <SideIcon type={item.id} />
+                {(!sidebarCollapsed || isMobile) && <span style={{ fontWeight: isActive ? 600 : 500, whiteSpace: "nowrap" }}>{item.label}</span>}
+              </button>
+            );
+          })}
         </nav>
 
         <div style={{ padding: "16px", borderTop: "1px solid #141414" }}>
-          <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "12px", color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", transition: "all 0.2s", justifyContent: (!sidebarCollapsed || isMobile) ? "flex-start" : "center", fontFamily: "inherit" }}>
+          <button onClick={handleLogout} style={{
+            width: "100%", display: "flex", alignItems: "center", gap: "12px",
+            padding: "12px", borderRadius: "12px", color: "#ef4444",
+            background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)",
+            cursor: "pointer", transition: "all 0.2s",
+            justifyContent: (!sidebarCollapsed || isMobile) ? "flex-start" : "center",
+            fontFamily: "inherit", fontWeight: "bold"
+          }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"}>
             <Icon name="logout" size={20} />
-            {(!sidebarCollapsed || isMobile) && <span style={{ fontWeight: 500 }}>Sair</span>}
+            {(!sidebarCollapsed || isMobile) && <span>Sair da Conta</span>}
           </button>
         </div>
       </motion.aside>

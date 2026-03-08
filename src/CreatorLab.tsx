@@ -187,7 +187,7 @@ INSTRUÇÕES DE EDIÇÃO:
   const nextStep = () => setStep(s => Math.min(s + 1, 4));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-  if (loading) return <div className="h-full flex items-center justify-center"><LoadingOverlay message={loadingMessage} /></div>;
+  if (loading) return <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><LoadingOverlay message={loadingMessage} /></div>;
 
   if (result) {
     return (
@@ -327,7 +327,7 @@ INSTRUÇÕES DE EDIÇÃO:
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="space-y-8"
+            style={{ display: "flex", flexDirection: "column", gap: "32px" }}
           >
             {/* Pergunta 1: Produto */}
             <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>

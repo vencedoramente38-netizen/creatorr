@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from './types';
 import { AppProvider, useApp } from './AppContext';
-import Layout from './Layout';
+import Layout, { MeteorShower } from './Layout';
+import { STOR } from './lib/supabase';
 import Dashboard from './Dashboard';
 import Radar from './Radar';
 import CreatorLab from './CreatorLab';
@@ -167,100 +168,48 @@ const AdminPanel: React.FC = () => {
 
   const inp: React.CSSProperties = { width: "100%", padding: "11px 12px", background: "#050505", border: "1px solid #27272a", borderRadius: "8px", color: "white", fontSize: "14px", outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
 
-  return (
-    <div style={{ padding: "24px", color: "white" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
-        <div>
-          <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>Painel Admin</h1>
-          <p style={{ color: "#71717a", margin: "6px 0 0 0", fontSize: "14px" }}>Gerencie os produtos exibidos no app</p>
-        </div>
-        <PrimaryBtn onClick={() => setShowModal(true)} style={{ padding: "12px 24px", fontSize: "14px" }}>+ Adicionar Produto</PrimaryBtn>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
-        {products.map(p => (
-          <div key={p.id} style={{ padding: "20px", background: "#111111", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.1)", borderTop: `3px solid ${p.viralScore > 94 ? '#DEDEDE' : p.viralScore > 90 ? '#a855f7' : '#06b6d4'}`, display: "flex", justifyContent: "space-between", alignItems: "center", transition: "box-shadow 0.2s" }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
-          >
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <div style={{ width: "48px", height: "48px", background: "#222", borderRadius: "8px", overflow: "hidden", flexShrink: 0 }}>
-                <img src={p.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-              <div>
-                <p style={{ fontWeight: "bold", margin: 0, fontSize: "14px" }}>{p.name}</p>
-                <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#71717a" }}>{p.category} • {p.priceText}</p>
-                <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#3f3f46" }}>Score: {p.viralScore}</p>
-              </div>
-            </div>
-            <button onClick={() => removeProduct(p.id)} style={{ padding: "8px 12px", background: "none", border: "1px solid #ef4444", color: "#ef4444", cursor: "pointer", fontWeight: "bold", borderRadius: "8px", fontSize: "12px", fontFamily: "inherit", flexShrink: 0 }}>
-              Remover
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {showModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-          <div style={{ background: "#141414", padding: "32px", borderRadius: "24px", width: "100%", maxWidth: "560px", border: "1px solid #27272a", maxHeight: "90vh", overflowY: "auto" }}>
-            <h2 style={{ marginBottom: "24px", fontSize: "20px", fontWeight: "bold" }}>Novo Produto</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>Nome do Produto *</label>
-                <input style={inp} value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} placeholder="Ex: Kit de Skincare Premium" />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>Categoria</label>
-                  <select style={{ ...inp, background: "#050505" }} value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}>
-                    <option value="Utensílios">Utensílios</option>
-                    <option value="Frutas">Frutas</option>
-                    <option value="Organização">Organização</option>
-                    <option value="Personalizado">Personalizado</option>
-                    <option value="Acessórios">Acessórios</option>
-                    <option value="Skincare">Skincare</option>
-                    <option value="Moda">Moda</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>Score Viral (0–100)</label>
-                  <input type="number" min={0} max={100} style={inp} value={newProduct.viralScore} onChange={e => setNewProduct({ ...newProduct, viralScore: Number(e.target.value) })} />
-                </div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>Preço de Venda</label>
-                  <input style={inp} value={newProduct.priceText} onChange={e => setNewProduct({ ...newProduct, priceText: e.target.value })} placeholder="R$ 49,90" />
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>Comissão (%)</label>
-                  <input type="number" style={inp} value={newProduct.commission} onChange={e => setNewProduct({ ...newProduct, commission: Number(e.target.value) })} />
-                </div>
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "12px", color: "#71717a", marginBottom: "6px" }}>URL da Imagem</label>
-                <input style={inp} value={newProduct.imageUrl} onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })} placeholder="https://..." />
-              </div>
-              <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
-                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: "14px", background: "#27272a", border: "none", borderRadius: "12px", color: "white", cursor: "pointer", fontWeight: "bold", fontSize: "14px", fontFamily: "inherit" }}>
-                  Cancelar
-                </button>
-                <PrimaryBtn onClick={handleSave} style={{ flex: 1, padding: "14px", fontSize: "14px" }}>
-                  Salvar Produto
-                </PrimaryBtn>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  {/* removed AdminPanel markup */ }
 };
 
 // ─── App Content ───
 const AppContent: React.FC = () => {
-  const { user } = useApp();
+  const { user, setUser } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const [appLoading, setAppLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authTab, setAuthTab] = useState("login"); // "login" ou "register"
+  const [expiredMsg, setExpiredMsg] = useState("");
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await STOR.g("session");
+
+      if (!session) {
+        setAppLoading(false);
+        setShowAuth(true);
+        return;
+      }
+
+      if (session.plan_type === "monthly" && session.expires_at) {
+        if (new Date(session.expires_at) < new Date()) {
+          await STOR.s("session", null);
+          setExpiredMsg("Seu plano mensal expirou. Crie uma nova conta com uma chave válida.");
+          setAppLoading(false);
+          setShowAuth(true);
+          return;
+        }
+      }
+
+      setCurrentUser(session);
+      setUser(session);
+      setAppLoading(false);
+      setShowAuth(false);
+    };
+
+    checkSession();
+  }, [setUser]);
 
   useEffect(() => {
     const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement || document.createElement("link");
@@ -270,7 +219,39 @@ const AppContent: React.FC = () => {
     document.title = "CreatorAI Pro";
   }, []);
 
-  if (!user) return <Auth />;
+  if (appLoading) return (
+    <div style={{
+      position: "fixed", inset: 0, background: "#050505",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexDirection: "column", gap: 16, zIndex: 9999,
+    }}>
+      <MeteorShower />
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
+        <div style={{ fontSize: 52, marginBottom: 16 }}>⚡</div>
+        <div style={{
+          color: "white", fontSize: 20, fontWeight: 700,
+          fontFamily: '"SF Pro Display", Helvetica, Arial, sans-serif'
+        }}>
+          Carregando...
+        </div>
+      </div>
+    </div>
+  );
+
+  if (showAuth) {
+    return (
+      <Auth
+        authTab={authTab}
+        setAuthTab={setAuthTab}
+        expiredMsg={expiredMsg}
+        onLoginSuccess={(session: any) => {
+          setCurrentUser(session);
+          setUser(session);
+          setShowAuth(false);
+        }}
+      />
+    );
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -281,7 +262,6 @@ const AppContent: React.FC = () => {
       case 'creator-editor': return <SyncEditor />;
       case 'viral-creator': return <ViralCreator />;
       case 'academy': return <Academy />;
-      case 'admin': return <AdminPanel />;
       case 'settings': return <Settings />;
       default: return <Dashboard />;
     }

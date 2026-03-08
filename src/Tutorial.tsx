@@ -4,63 +4,63 @@ import { Play, BookOpen, Video, Zap, CheckCircle2, ArrowRight } from 'lucide-rea
 
 const Tutorial: React.FC = () => {
   const steps = [
-    { title: 'Encontre o Produto', desc: 'Use o Radar de Produtos para identificar itens com alto Score Viral.', icon: Zap, color: 'text-yellow-500' },
-    { title: 'Gere o Roteiro', desc: 'No Creator Lab, configure seu vídeo e gere um prompt V03 profissional.', icon: Play, color: 'text-primary' },
-    { title: 'Crie o Vídeo', desc: 'Use o Flow VEO3 para transformar seu prompt em um vídeo cinematográfico.', icon: Video, color: 'text-primary' },
-    { title: 'Edite e Publique', desc: 'Ajuste o enquadramento no Sync Editor e poste no TikTok Shop.', icon: CheckCircle2, color: 'text-emerald-500' },
+    { title: 'Encontre o Produto', desc: 'Use o Radar de Produtos para identificar itens com alto Score Viral.', icon: Zap, color: '#eab308' },
+    { title: 'Gere o Roteiro', desc: 'No Creator Lab, configure seu vídeo e gere um prompt V03 profissional.', icon: Play, color: '#DEDEDE' },
+    { title: 'Crie o Vídeo', desc: 'Use o Flow VEO3 para transformar seu prompt em um vídeo cinematográfico.', icon: Video, color: '#DEDEDE' },
+    { title: 'Edite e Publique', desc: 'Ajuste o enquadramento no Creator Editor e poste no TikTok Shop.', icon: CheckCircle2, color: '#10b981' },
   ];
 
   return (
-    <div className="space-y-8 pb-20">
+    <div style={{ display: "flex", flexDirection: "column", gap: "32px", paddingBottom: "80px", color: "white" }}>
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tutorial</h1>
-        <p className="text-zinc-400 mt-1">Aprenda a dominar o ecossistema Creatoria em poucos minutos.</p>
+        <h1 style={{ fontSize: "30px", fontWeight: "bold", margin: "0 0 4px 0", letterSpacing: "-0.02em" }}>Tutorial</h1>
+        <p style={{ color: "#a1a1aa", margin: 0, fontSize: "15px" }}>Aprenda a dominar o ecossistema Creatoria em poucos minutos.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "24px", ...({ '@media (min-width: 768px)': { gridTemplateColumns: "1fr 1fr" } } as any) }}>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-8 rounded-3xl bg-[#09090B] border border-zinc-800 relative overflow-hidden group"
+          style={{ padding: "32px", borderRadius: "24px", background: "#09090B", border: "1px solid #27272a", position: "relative", overflow: "hidden" }}
         >
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Play size={120} className="text-primary" />
+          <div style={{ position: "absolute", top: 0, right: 0, padding: "32px", opacity: 0.05, transition: "opacity 0.3s" }}>
+            <Play size={120} color="#DEDEDE" />
           </div>
-          <h3 className="text-2xl font-bold mb-4">Vídeo de Introdução</h3>
-          <div className="aspect-video rounded-2xl bg-black border border-zinc-800 flex items-center justify-center relative group cursor-pointer">
-            <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:scale-110 transition-transform">
+          <h3 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px", marginTop: 0 }}>Vídeo de Introdução</h3>
+          <div style={{ aspectRatio: "16/9", borderRadius: "16px", background: "black", border: "1px solid #27272a", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center", position: "relative", cursor: "pointer" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#DEDEDE", color: "black", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10 }}>
               <Play size={32} fill="currentColor" />
             </div>
-            <img src="https://picsum.photos/seed/tutorial/800/450" alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 rounded-2xl" />
+            <img src="https://picsum.photos/seed/tutorial/800/450" alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.4, borderRadius: "16px" }} />
           </div>
-          <p className="text-sm text-zinc-400 mt-6">Assista ao guia rápido de 2 minutos para começar a faturar com o TikTok Shop.</p>
+          <p style={{ fontSize: "14px", color: "#a1a1aa", marginTop: "24px", marginBottom: 0 }}>Assista ao guia rápido de 2 minutos para começar a faturar com o TikTok Shop.</p>
         </motion.div>
 
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <BookOpen size={24} className="text-primary" />
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <h3 style={{ fontSize: "20px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+            <BookOpen size={24} color="#DEDEDE" />
             Passo a Passo
           </h3>
-          <div className="space-y-3">
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {steps.map((step, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="p-4 rounded-2xl bg-[#09090B] border border-zinc-800 flex items-start gap-4 hover:border-zinc-700 transition-all"
+                style={{ padding: "16px", borderRadius: "16px", background: "#09090B", border: "1px solid #27272a", display: "flex", alignItems: "flex-start", gap: "16px", transition: "all 0.2s" }}
               >
-                <div className={cn("p-3 rounded-xl bg-zinc-800 flex-shrink-0", step.color)}>
+                <div style={{ padding: "12px", borderRadius: "12px", background: "#27272a", flexShrink: 0, color: step.color }}>
                   <step.icon size={20} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm">{step.title}</h4>
-                  <p className="text-xs text-zinc-500 mt-1">{step.desc}</p>
+                  <h4 style={{ fontWeight: "bold", fontSize: "14px", margin: "0 0 4px 0" }}>{step.title}</h4>
+                  <p style={{ fontSize: "12px", color: "#a1a1aa", margin: 0 }}>{step.desc}</p>
                 </div>
               </motion.div>
             ))}
           </div>
-          <button className="w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2">
+          <button style={{ width: "100%", padding: "16px", background: "#27272a", color: "white", fontWeight: "bold", borderRadius: "16px", border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", transition: "all 0.2s", marginTop: "16px" }}>
             Ver documentação completa <ArrowRight size={18} />
           </button>
         </div>
@@ -69,6 +69,5 @@ const Tutorial: React.FC = () => {
   );
 };
 
-const cn = (...inputs: any[]) => inputs.filter(Boolean).join(' ');
-
 export default Tutorial;
+

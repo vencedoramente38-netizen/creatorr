@@ -209,76 +209,74 @@ const Radar: React.FC = () => {
           <div
             key={product.id}
             style={{
-              background: "#111111",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderTop: `3px solid ${product.viralScore > 94 ? '#DEDEDE' : product.viralScore > 90 ? '#a855f7' : '#06b6d4'}`,
+              background: "#09090B",
+              border: "1px solid rgba(255,255,255,0.05)",
               borderRadius: "16px",
-              padding: "20px",
+              overflow: "hidden",
               cursor: "pointer",
-              transition: "box-shadow 0.2s",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              display: "flex",
+              flexDirection: "column",
             }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "translateY(-4px)";
+              e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.5)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
+            }}
             onClick={() => setSelectedProduct(product)}
           >
-            {/* Header: thumbnail + name + score */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1, minWidth: 0 }}>
-                <div style={{ width: "52px", height: "52px", borderRadius: "10px", overflow: "hidden", background: "#1a1a1a", flexShrink: 0 }}>
-                  <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontWeight: 700, fontSize: "13px", margin: "0 0 2px 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</p>
-                  <p style={{ fontSize: "11px", color: "#71717a", margin: 0 }}>{product.category}</p>
-                </div>
-              </div>
-              <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "10px" }}>
-                <p style={{ fontSize: "26px", fontWeight: 900, margin: "0 0 2px 0", lineHeight: 1 }}>{product.viralScore}</p>
-                <p style={{ fontSize: "9px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: 0 }}>Score</p>
+            {/* Top Image & Badge */}
+            <div style={{ position: "relative", width: "100%", height: "180px", background: "#1a1a1a" }}>
+              <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", top: "12px", right: "12px", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", padding: "4px 8px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }}>
+                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", textTransform: "uppercase", letterSpacing: "0.05em" }}>{product.category}</span>
               </div>
             </div>
 
-            {/* Separator */}
-            <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "14px" }} />
+            {/* Content Details */}
+            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px", flex: 1 }}>
+              <div>
+                <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "0 0 4px 0", color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</h3>
+                <p style={{ fontSize: "20px", fontWeight: 900, color: "#10b981", margin: 0 }}>{product.priceText}</p>
+              </div>
 
-            {/* Metrics 2x2 */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
-              {[
-                { label: "Preço", value: product.priceText, color: "#DEDEDE" },
-                { label: "Lucro Est.", value: `R$ ${(parseFloat(product.priceText.replace('R$ ', '').replace(',', '.') || '0') * (product.commission / 100)).toFixed(2)}`, color: "#10b981" },
-                { label: "Views/mês", value: `${(product.salesPerDay * 30).toLocaleString()}`, color: "#a855f7" },
-                { label: "Pedidos/mês", value: String(product.salesPerDay * 30), color: "#06b6d4" },
-              ].map(m => (
-                <div key={m.label} style={{ background: "#1a1a1a", borderRadius: "8px", padding: "8px 10px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  <p style={{ fontSize: "9px", color: "#71717a", margin: "0 0 3px 0", textTransform: "uppercase", fontWeight: "bold" }}>{m.label}</p>
-                  <p style={{ fontSize: "13px", fontWeight: "bold", margin: 0, color: m.color }}>{m.value}</p>
+              {/* Grid Data */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <p style={{ fontSize: "10px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: "0 0 4px 0" }}>Score</p>
+                  <p style={{ fontSize: "14px", fontWeight: 900, color: "#a855f7", margin: 0 }}>{product.viralScore}</p>
                 </div>
-              ))}
-            </div>
+                <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                  <p style={{ fontSize: "10px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: "0 0 4px 0" }}>Vendas/mês</p>
+                  <p style={{ fontSize: "14px", fontWeight: 900, color: "#06b6d4", margin: 0 }}>{(product.salesPerDay * 30).toLocaleString()}</p>
+                </div>
+              </div>
 
-            {/* Tags */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "12px" }}>
-              {['TikTok', 'Trending', 'Hot'].map(tag => (
-                <span key={tag} style={{ fontSize: "9px", background: "rgba(255,255,255,0.05)", padding: "3px 8px", borderRadius: "20px", color: "#a1a1aa", fontWeight: "bold" }}>
-                  #{tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={e => { e.stopPropagation(); setSelectedProduct(product); }}
-                style={{ flex: 1, padding: "9px", background: "rgba(222,222,222,0.08)", border: "1px solid rgba(222,222,222,0.15)", borderRadius: "8px", color: "#DEDEDE", fontSize: "11px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit" }}
-              >
-                Ver Detalhes
-              </button>
-              <button
-                onClick={e => e.stopPropagation()}
-                style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", color: "#71717a", fontSize: "11px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit" }}
-              >
-                Criar Vídeo
-              </button>
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
+                <button
+                  onClick={e => { e.stopPropagation(); setSelectedProduct(product); }}
+                  style={{ flex: 1, padding: "10px", background: "rgba(255,255,255,0.05)", border: "none", borderRadius: "8px", color: "white", fontSize: "12px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit", transition: "background 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                >
+                  Detalhes
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    addNotification("Produto selecionado!", "Redirecionando para o Creatoria.");
+                  }}
+                  style={{ flex: 1, padding: "10px", background: "#DEDEDE", border: "none", borderRadius: "8px", color: "#050505", fontSize: "12px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit", transition: "opacity 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                  Criar Vídeo
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -403,25 +401,7 @@ const Radar: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Recommended Creatives */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <Icon name="palette" size={20} style={{ color: "#DEDEDE" }} />
-                      Criativos Recomendados
-                    </h3>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} style={{ aspectRatio: "9/16", borderRadius: "12px", backgroundColor: "#141414", border: "1px solid #27272a", overflow: "hidden", position: "relative", cursor: "pointer" }}>
-                          <img src={`https://picsum.photos/seed/${selectedProduct.id}-${i}/400/700`} alt="" style={{ width: "100%", height: "100%", objectCover: "cover", opacity: 0.5 }} />
-                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
-                              <Icon name="video" size={20} />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+
 
                   {/* Delivery & Supplier */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>

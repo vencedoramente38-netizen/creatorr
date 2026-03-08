@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, DashboardStats, UserProfile, AppNotification, PRODUCTS_SEED } from './types';
-import { supabase } from './lib/supabase';
+import { STOR, sbGet } from './lib/supabase';
 
 interface AppContextType {
   user: any | null;
@@ -77,28 +77,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   useEffect(() => {
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setProfile(prev => ({ ...prev, email: session.user.email || '' }));
+    // Session is managed purely by App.tsx now
+    const checkUser = async () => {
+      const session = await STOR.g("session");
+      setUser(session ?? null);
+      if (session?.email) {
+        setProfile(prev => ({ ...prev, email: session.email }));
       }
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setProfile(prev => ({ ...prev, email: session.user.email || '' }));
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    };
+    checkUser();
   }, []);
 
   useEffect(() => {
     localStorage.setItem('userProfile', JSON.stringify(profile));
   }, [profile]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await sbGet('products', 'select=*');
+        if (data && data.length > 0) {
+          setProducts(data);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar produtos do Supabase:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem('adminProducts', JSON.stringify(products));

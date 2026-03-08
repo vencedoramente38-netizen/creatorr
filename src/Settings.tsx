@@ -1,65 +1,52 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from './AppContext';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  User,
-  Bell,
-  Shield,
-  Lock,
-  Save,
-  Image as ImageIcon,
-  Check,
-  LayoutDashboard,
-  RefreshCw,
-  TrendingUp,
-  ShoppingCart,
-  BarChart3,
-  Package
-} from 'lucide-react';
-import { cn } from './lib/utils';
-import { LoadingOverlay } from './components/ui/loading-overlay';
-import { DashboardStats } from './types';
+import { Key, Package, Shield, Lock, Save, Trash2, Check, LayoutDashboard } from 'lucide-react';
+import { PrimaryBtn } from './App';
+import { sbGet, sbPost, sbDelete } from './lib/supabase';
 
-const Settings: React.FC = () => {
-  const {
-    profile, setProfile,
-    notificationsEnabled, setNotificationsEnabled,
-    stats, setStats,
-    addNotification
-  } = useApp();
+function RainbowButton({ onClick, children, disabled, style = {} }: {
+  onClick?: () => void; children: React.ReactNode; disabled?: boolean; style?: React.CSSProperties;
+}) {
+  return (
+    <button onClick={onClick} disabled={disabled} className="rainbow-btn"
+      style={{ padding: "14px 32px", fontSize: 16, fontWeight: 700, minWidth: 180, borderRadius: 14, ...style }}>
+      {children}
+    </button>
+  );
+}
 
-  const [loading, setLoading] = useState(false);
+export default function Settings() {
+  const { addNotification, products, setProducts } = useApp();
+
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminTab, setAdminTab] = useState<'keys' | 'products'>('keys');
 
-  // Form States
-  const [profileName, setProfileName] = useState(profile.name);
-  const [profileEmail, setProfileEmail] = useState(profile.email);
-  const [avatarPreview, setAvatarPreview] = useState(profile.avatar);
+  // Keys state
+  const [keys, setKeys] = useState<any[]>([]);
+  const [loadingKeys, setLoadingKeys] = useState(false);
+  const [generatingKey, setGeneratingKey] = useState(false);
 
-  const [dash, setDash] = useState<DashboardStats>(stats);
+  // Form state (product)
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '', category: 'Utensílios', priceText: 'R$ ', viralScore: 85,
+    imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300&h=300',
+    tiktokUrl: ''
+  });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  // Keys Fetch
+  const fetchKeys = async () => {
+    setLoadingKeys(true);
+    const data = await sbGet('keys');
+    if (data) setKeys(data);
+    setLoadingKeys(false);
   };
 
-  const saveProfile = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setProfile({ name: profileName, email: profileEmail, avatar: avatarPreview });
-      setLoading(false);
-      addNotification("Perfil atualizado!", "Suas informações foram salvas com sucesso.");
-    }, 1000);
-  };
+  useEffect(() => {
+    if (adminAuthenticated) fetchKeys();
+  }, [adminAuthenticated]);
 
   const handleAdminAuth = () => {
     if (adminPassword === 'admin123') {
@@ -70,242 +57,279 @@ const Settings: React.FC = () => {
     }
   };
 
-  const saveDashboard = () => {
-    setStats(dash);
-    localStorage.setItem('dashboardData', JSON.stringify(dash));
-    addNotification("Dashboard atualizado!", "Números atualizados com sucesso!");
+  const handleGenerateKey = async (type: 'monthly' | 'lifetime') => {
+    setGeneratingKey(true);
+    const prefix = type === 'monthly' ? 'MENSAL-' : 'VITALICIO-';
+    const key = prefix + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    const data = await sbPost('keys', { key, type });
+    if (data && data.length > 0) {
+      setKeys([data[0], ...keys]);
+      addNotification("Chave Gerada", `Nova chave ${type} criada com sucesso.`);
+    } else {
+      // fallback se a API n retornar o single object, apenas refetch
+      fetchKeys();
+      addNotification("Chave Gerada", `Nova chave ${type} criada.`);
+    }
+    setGeneratingKey(false);
+  };
+
+  const handleDeleteKey = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta chave?")) return;
+    try {
+      await sbDelete('keys', `id=eq.${id}`);
+      setKeys(keys.filter(k => k.id !== id));
+      addNotification("Chave Excluída", "A chave foi removida.");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveProduct = async () => {
+    if (!newProduct.name || !newProduct.imageUrl || !newProduct.tiktokUrl) {
+      addNotification("Erro", "Preencha os campos obrigatórios.");
+      return;
+    }
+    const data = await sbPost('products', newProduct);
+    if (data && data.length > 0) {
+      setProducts([data[0], ...products]);
+    } else {
+      // fallback (caso sbPost não retorne a single row devido header return=representation missing, o app local context n recarrega sozinho)
+      const prod = { ...newProduct, id: Math.random().toString() };
+      setProducts([prod, ...products]);
+    }
+    setShowProductModal(false);
+    addNotification("Produto adicionado", "O produto foi salvo no Supabase.");
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Excluir produto?")) return;
+    try {
+      await sbDelete('products', `id=eq.${id}`);
+      setProducts(products.filter(p => p.id !== id));
+      addNotification("Produto removido", "Excluído com sucesso.");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const cardStyle = {
+    background: "#09090B", border: "1px solid #27272a", borderRadius: 24, padding: 32, marginBottom: 24
+  };
+
+  const inpStyle = {
+    width: "100%", padding: "14px", background: "#141414", border: "1px solid #27272a",
+    borderRadius: 12, color: "white", fontSize: 14, outline: "none", boxSizing: "border-box" as React.CSSProperties["boxSizing"], fontFamily: "inherit"
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
-        <p className="text-zinc-400 mt-1">Gerencie seu perfil e preferências do sistema.</p>
+    <div style={{ maxWidth: 900, mx: "auto", margin: "0 auto", padding: "24px 16px 80px", color: "white" }}>
+      <div style={{ marginBottom: 40 }}>
+        <h1 style={{ fontSize: 32, fontWeight: 900, margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>Configurações</h1>
+        <p style={{ color: "#71717a", margin: 0, fontSize: 15 }}>Painel de Administração e Gestão do Sistema.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-6"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <User size={20} />
-            </div>
-            <h3 className="text-lg font-bold">Perfil</h3>
+      {/* Admin Auth */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={cardStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <div style={{ padding: 10, background: "rgba(249,115,22,0.1)", color: "#f97316", borderRadius: 12 }}>
+            <Shield size={24} />
           </div>
-
-          <div className="space-y-4">
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="w-24 h-24 rounded-full bg-zinc-800 border-2 border-zinc-700 overflow-hidden relative group">
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-zinc-600">
-                    <User size={40} />
-                  </div>
-                )}
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <ImageIcon size={20} className="text-white" />
-                </button>
-              </div>
-              <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" hidden />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="text-xs font-bold text-primary hover:underline"
-              >
-                Escolher da galeria
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Nome Completo</label>
-              <input
-                type="text"
-                value={profileName}
-                onChange={(e) => setProfileName(e.target.value)}
-                placeholder="Seu nome"
-                className="w-full p-3 bg-black/50 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary text-white"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Email</label>
-              <input
-                type="email"
-                value={profileEmail}
-                onChange={(e) => setProfileEmail(e.target.value)}
-                placeholder="seu@email.com"
-                className="w-full p-3 bg-black/50 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary text-white"
-              />
-            </div>
-
-            <button
-              onClick={saveProfile}
-              disabled={loading}
-              className="w-full py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? <RefreshCw className="animate-spin" size={18} /> : <Save size={18} />}
-              Salvar perfil
-            </button>
+          <div>
+            <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Painel de Admin</h3>
+            <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#71717a" }}>Acesso restrito para gestão de chaves e produtos.</p>
           </div>
-        </motion.div>
-
-        {/* Notifications & Admin Access */}
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-6"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                <Bell size={20} />
-              </div>
-              <h3 className="text-lg font-bold">Notificações</h3>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-zinc-800">
-              <div>
-                <p className="text-sm font-bold">Ativar notificações</p>
-                <p className="text-xs text-zinc-500 mt-0.5">Receba alertas sobre vendas e atualizações</p>
-              </div>
-              <button
-                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                className={cn(
-                  "w-12 h-6 rounded-full transition-all relative",
-                  notificationsEnabled ? "bg-emerald-500" : "bg-zinc-700"
-                )}
-              >
-                <div className={cn(
-                  "absolute top-1 w-4 h-4 bg-white rounded-full transition-all",
-                  notificationsEnabled ? "right-1" : "left-1"
-                )} />
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Admin Access Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-6 rounded-3xl bg-[#09090B] border border-zinc-800 space-y-6"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
-                <Shield size={20} />
-              </div>
-              <h3 className="text-lg font-bold">Painel de Admin</h3>
-            </div>
-
-            {!adminAuthenticated ? (
-              <div className="space-y-4">
-                <p className="text-xs text-zinc-500">Acesso restrito a administradores.</p>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
-                  <input
-                    type="password"
-                    placeholder="Digite a senha de admin"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-black/50 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 text-white"
-                  />
-                </div>
-                <button
-                  onClick={handleAdminAuth}
-                  className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all"
-                >
-                  Acessar painel
-                </button>
-              </div>
-            ) : (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3">
-                <Check className="text-emerald-500" size={20} />
-                <p className="text-sm font-bold text-emerald-500">Autenticado como Administrador</p>
-              </div>
-            )}
-          </motion.div>
         </div>
-      </div>
 
-      {/* Admin Panel Content */}
+        {!adminAuthenticated ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ position: "relative" }}>
+              <Lock size={18} style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "#71717a" }} />
+              <input
+                type="password" placeholder="Digite a senha de admin" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)}
+                style={{ ...inpStyle, paddingLeft: 44, background: "#050505" }}
+              />
+            </div>
+            <PrimaryBtn onClick={handleAdminAuth} style={{ padding: "14px", fontSize: 15, width: "100%" }}>
+              Acessar Painel
+            </PrimaryBtn>
+          </div>
+        ) : (
+          <div style={{ padding: "16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 12, display: "flex", alignItems: "center", gap: 12, color: "#10b981" }}>
+            <Check size={20} />
+            <span style={{ fontWeight: 700, fontSize: 14 }}>Autenticado como Administrador</span>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Admin Content */}
       <AnimatePresence>
         {adminAuthenticated && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            className="space-y-8"
-          >
-            <div className="rounded-2xl bg-[#09090B] border border-zinc-800 p-6 shadow-2xl">
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <LayoutDashboard className="w-5 h-5 text-[#0000FB]" />
-                Números do Dashboard
-              </h3>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-xs text-zinc-400 mb-1 block">Faturamento Total</label>
-                  <input value={dash.faturamento} onChange={e => setDash({ ...dash, faturamento: e.target.value })}
-                    className="w-full bg-[#09090B] border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm"
-                    placeholder="R$ 0,00" />
-                </div>
-                <div>
-                  <label className="text-xs text-zinc-400 mb-1 block">Pedidos</label>
-                  <input type="number" value={dash.pedidos} onChange={e => setDash({ ...dash, pedidos: Number(e.target.value) })}
-                    className="w-full bg-[#09090B] border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm"
-                    placeholder="0" />
-                </div>
-                <div>
-                  <label className="text-xs text-zinc-400 mb-1 block">Comissão Total</label>
-                  <input value={dash.comissao} onChange={e => setDash({ ...dash, comissao: e.target.value })}
-                    className="w-full bg-[#09090B] border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm"
-                    placeholder="R$ 0,00" />
-                </div>
-                <div>
-                  <label className="text-xs text-zinc-400 mb-1 block">Produtos Ativos</label>
-                  <input type="number" value={dash.produtosAtivos} onChange={e => setDash({ ...dash, produtosAtivos: Number(e.target.value) })}
-                    className="w-full bg-[#09090B] border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm"
-                    placeholder="0" />
-                </div>
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden" }}>
+            <div style={{ ...cardStyle, background: "#050505", border: "1px solid #1a1a1a" }}>
+              {/* Tabs */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 32, paddingBottom: 16, borderBottom: "1px solid #1a1a1a" }}>
+                <button
+                  onClick={() => setAdminTab('keys')}
+                  style={{
+                    padding: "10px 20px", borderRadius: 12, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", transition: "all 0.2s", fontFamily: "inherit",
+                    background: adminTab === 'keys' ? "#141414" : "transparent",
+                    color: adminTab === 'keys' ? "white" : "#71717a"
+                  }}
+                >
+                  <Key size={16} style={{ display: "inline-block", marginRight: 8, verticalAlign: "-3px" }} /> Gerenciar Chaves
+                </button>
+                <button
+                  onClick={() => setAdminTab('products')}
+                  style={{
+                    padding: "10px 20px", borderRadius: 12, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", transition: "all 0.2s", fontFamily: "inherit",
+                    background: adminTab === 'products' ? "#141414" : "transparent",
+                    color: adminTab === 'products' ? "white" : "#71717a"
+                  }}
+                >
+                  <Package size={16} style={{ display: "inline-block", marginRight: 8, verticalAlign: "-3px" }} /> Gerenciar Produtos
+                </button>
               </div>
 
-              {/* Gráfico — valores por mês */}
-              <p className="text-xs text-zinc-400 mb-2">Valores do Gráfico (por mês)</p>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {dash.chartData.map((item, i) => (
-                  <div key={i}>
-                    <label className="text-xs text-zinc-500 mb-1 block">{item.month}</label>
-                    <input type="number" value={item.vendas}
-                      onChange={e => {
-                        const updated = [...dash.chartData]
-                        updated[i] = { ...updated[i], vendas: Number(e.target.value) }
-                        setDash({ ...dash, chartData: updated })
-                      }}
-                      className="w-full bg-[#09090B] border border-zinc-700 rounded-xl px-3 py-2 text-white text-sm"
-                      placeholder="0" />
+              {/* KEYS TAB */}
+              {adminTab === 'keys' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+                    <PrimaryBtn onClick={() => handleGenerateKey('monthly')} disabled={generatingKey} style={{ padding: "12px 20px", flex: 1 }}>
+                      + Gerar Chave Mensal
+                    </PrimaryBtn>
+                    <RainbowButton onClick={() => handleGenerateKey('lifetime')} disabled={generatingKey} style={{ padding: "12px 20px", flex: 1, minWidth: "auto" }}>
+                      + Gerar Chave Vitalícia ♾️
+                    </RainbowButton>
                   </div>
-                ))}
-              </div>
 
-              <button onClick={saveDashboard}
-                className="w-full bg-[#0000FB] text-white font-semibold py-2.5 rounded-full hover:bg-[#0000e0] transition-all">
-                Salvar números
-              </button>
+                  <div style={{ border: "1px solid #1a1a1a", borderRadius: 16, overflow: "hidden" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, textAlign: "left" }}>
+                      <thead>
+                        <tr style={{ background: "#0a0a0a", borderBottom: "1px solid #1a1a1a", color: "#71717a" }}>
+                          <th style={{ padding: "12px 16px", fontWeight: 600 }}>Chave</th>
+                          <th style={{ padding: "12px 16px", fontWeight: 600 }}>Tipo</th>
+                          <th style={{ padding: "12px 16px", fontWeight: 600 }}>Status</th>
+                          <th style={{ padding: "12px 16px", fontWeight: 600, textAlign: "right" }}>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loadingKeys ? (
+                          <tr><td colSpan={4} style={{ padding: 24, textAlign: "center", color: "#71717a" }}>Carregando chaves...</td></tr>
+                        ) : keys.length === 0 ? (
+                          <tr><td colSpan={4} style={{ padding: 24, textAlign: "center", color: "#71717a" }}>Nenhuma chave encontrada.</td></tr>
+                        ) : keys.map(k => (
+                          <tr key={k.id} style={{ borderBottom: "1px solid #1a1a1a", background: k.used ? "rgba(255,255,255,0.02)" : "transparent" }}>
+                            <td style={{ padding: "16px", fontFamily: "monospace", color: k.used ? "#71717a" : "white" }}>{k.key}</td>
+                            <td style={{ padding: "16px" }}>
+                              <span style={{ padding: "4px 8px", background: k.type === 'lifetime' ? "rgba(168,85,247,0.1)" : "rgba(255,255,255,0.05)", color: k.type === 'lifetime' ? "#a855f7" : "#DEDEDE", borderRadius: 6, fontSize: 11, fontWeight: "bold", textTransform: "uppercase" }}>
+                                {k.type}
+                              </span>
+                            </td>
+                            <td style={{ padding: "16px" }}>
+                              {k.used ? (
+                                <span style={{ color: "#ef4444", fontSize: 12, fontWeight: "bold" }}>Usada ({k.used_by})</span>
+                              ) : (
+                                <span style={{ color: "#10b981", fontSize: 12, fontWeight: "bold" }}>Disponível</span>
+                              )}
+                            </td>
+                            <td style={{ padding: "16px", textAlign: "right" }}>
+                              <button onClick={() => handleDeleteKey(k.id)} style={{ padding: "6px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold", fontSize: 12 }}>
+                                Excluir
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* PRODUCTS TAB */}
+              {adminTab === 'products' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
+                    <PrimaryBtn onClick={() => setShowProductModal(true)} style={{ padding: "12px 24px" }}>+ Adicionar Produto</PrimaryBtn>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                    {products.map(p => (
+                      <div key={p.id} style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 16, padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <img src={p.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover", background: "#141414" }} />
+                          <div>
+                            <p style={{ margin: 0, fontSize: 14, fontWeight: "bold" }}>{p.name}</p>
+                            <p style={{ margin: "2px 0 0", fontSize: 12, color: "#71717a" }}>{p.category} • {p.priceText}</p>
+                          </div>
+                        </div>
+                        <button onClick={() => handleDeleteProduct(p.id)} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", padding: 8 }}>
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+
+                    {products.length === 0 && (
+                      <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 40, color: "#71717a", fontSize: 14 }}>
+                        Nenhum produto cadastrado.
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      {loading && <LoadingOverlay />}
+
+      {/* Modal Novo Produto */}
+      {showProductModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#09090B", border: "1px solid #27272a", borderRadius: 24, padding: 32, width: "100%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }}>
+            <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 24, marginTop: 0 }}>Adicionar Novo Produto</h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>Nome do Produto *</label>
+                <input value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} style={inpStyle} placeholder="Ex: Ring Light Profissional" />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>Preço Visível</label>
+                  <input value={newProduct.priceText} onChange={e => setNewProduct({ ...newProduct, priceText: e.target.value })} style={inpStyle} placeholder="Ex: R$ 49,90" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>Score Viral (0 a 100)</label>
+                  <input type="number" min={0} max={100} value={newProduct.viralScore} onChange={e => setNewProduct({ ...newProduct, viralScore: Number(e.target.value) })} style={inpStyle} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>Categoria</label>
+                <input value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })} style={inpStyle} placeholder="Ex: Tecnologia, Beleza..." />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>URL da Imagem *</label>
+                <input value={newProduct.imageUrl} onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })} style={inpStyle} placeholder="https://..." />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#71717a", fontWeight: "bold", marginBottom: 6, textTransform: "uppercase" }}>Link de Afiliado (Tiktok) *</label>
+                <input value={newProduct.tiktokUrl} onChange={e => setNewProduct({ ...newProduct, tiktokUrl: e.target.value })} style={inpStyle} placeholder="https://..." />
+              </div>
+
+              <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+                <button onClick={() => setShowProductModal(false)} style={{ flex: 1, padding: 14, background: "transparent", border: "1px solid #27272a", borderRadius: 12, color: "white", fontWeight: "bold", cursor: "pointer" }}>
+                  Cancelar
+                </button>
+                <PrimaryBtn onClick={handleSaveProduct} style={{ flex: 1, padding: 14 }}>
+                  Salvar Produto
+                </PrimaryBtn>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Settings;
+

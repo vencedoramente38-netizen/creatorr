@@ -1,5 +1,4 @@
 import React from 'react';
-import { cn } from "@/lib/utils"
 
 interface AnimatedCircularProgressBarProps {
   max?: number
@@ -8,6 +7,7 @@ interface AnimatedCircularProgressBarProps {
   gaugePrimaryColor: string
   gaugeSecondaryColor: string
   className?: string
+  style?: React.CSSProperties
 }
 
 export function AnimatedCircularProgressBar({
@@ -17,6 +17,7 @@ export function AnimatedCircularProgressBar({
   gaugePrimaryColor,
   gaugeSecondaryColor,
   className,
+  style,
 }: AnimatedCircularProgressBarProps) {
   const circumference = 2 * Math.PI * 45
   const percentPx = circumference / 100
@@ -24,8 +25,12 @@ export function AnimatedCircularProgressBar({
 
   return (
     <div
-      className={cn("relative size-40 text-2xl font-semibold", className)}
       style={{
+        position: "relative",
+        width: "160px",
+        height: "160px",
+        fontSize: "24px",
+        fontWeight: 600,
         "--circle-size": "100px",
         "--circumference": circumference,
         "--percent-to-px": `${percentPx}px`,
@@ -36,9 +41,10 @@ export function AnimatedCircularProgressBar({
         "--delay": "0s",
         "--percent-to-deg": "3.6deg",
         transform: "translateZ(0)",
+        ...style
       } as React.CSSProperties}
     >
-      <svg fill="none" className="size-full" strokeWidth="2" viewBox="0 0 100 100">
+      <svg fill="none" style={{ width: "100%", height: "100%" }} strokeWidth="2" viewBox="0 0 100 100">
         {currentPercent <= 90 && currentPercent >= 0 && (
           <circle
             cx="50"
@@ -48,8 +54,8 @@ export function AnimatedCircularProgressBar({
             strokeDashoffset="0"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="opacity-100"
             style={{
+              opacity: 1,
               stroke: gaugeSecondaryColor,
               "--stroke-percent": 90 - currentPercent,
               "--offset-factor-secondary": "calc(1 - var(--offset-factor))",
@@ -68,8 +74,8 @@ export function AnimatedCircularProgressBar({
           strokeDashoffset="0"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="opacity-100"
           style={{
+            opacity: 1,
             stroke: gaugePrimaryColor,
             "--stroke-percent": currentPercent,
             strokeDasharray: "calc(var(--stroke-percent) * var(--percent-to-px)) var(--circumference)",
@@ -82,7 +88,7 @@ export function AnimatedCircularProgressBar({
       </svg>
       <span
         data-current-value={currentPercent}
-        className="animate-in fade-in absolute inset-0 m-auto size-fit delay-[var(--delay)] duration-[var(--transition-length)] ease-linear"
+        style={{ position: "absolute", inset: 0, margin: "auto", width: "fit-content", height: "fit-content", transition: "opacity var(--transition-length) linear var(--delay)", opacity: 1 }}
       >
         {currentPercent}%
       </span>

@@ -19,14 +19,14 @@ export function LoadingOverlay({ message = "Carregando..." }: LoadingOverlayProp
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-12">
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px", padding: "48px 0" }}>
       <AnimatedCircularProgressBar
         value={value}
         gaugePrimaryColor="#E81C3E"
         gaugeSecondaryColor="#2a2a2a"
-        className="size-24 text-base text-white"
+        style={{ width: "96px", height: "96px", fontSize: "16px", color: "white" }}
       />
-      <p className="text-sm text-muted-foreground animate-pulse">{message}</p>
+      <p style={{ fontSize: "14px", color: "#a1a1aa", animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" }}>{message}</p>
     </div>
   )
 }
