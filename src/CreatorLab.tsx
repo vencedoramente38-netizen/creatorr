@@ -777,28 +777,24 @@ INSTRUÇÕES DE EDIÇÃO:
               <button
                 onClick={handleGeneratePrompt}
                 disabled={!selectedProductId}
+                className="rainbow-btn"
                 style={{
                   width: "100%",
                   padding: "20px",
-                  borderRadius: "24px",
+                  borderRadius: "20px",
                   fontWeight: 900,
                   fontStyle: "italic",
                   textTransform: "uppercase",
                   fontSize: "20px",
                   letterSpacing: "0.05em",
-                  border: "none",
-                  cursor: selectedProductId ? "pointer" : "not-allowed",
-                  transition: "all 0.2s",
-                  backgroundColor: selectedProductId ? "#DEDEDE" : "#141414",
-                  color: selectedProductId ? "#050505" : "#71717a",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "12px",
-                  boxShadow: selectedProductId ? "0 25px 50px -12px rgba(222, 222, 222, 0.2)" : "none"
+                  minWidth: "unset",
                 }}
               >
-                Gerar Prompt V03 <Icon name="wand" size={24} />
+                Gerar Roteiro <Icon name="wand" size={24} />
               </button>
               {!selectedProductId && <p style={{ textAlign: "center", fontSize: "12px", color: "#ef4444", fontWeight: "bold", marginTop: "12px" }}>Selecione um produto para continuar.</p>}
             </div>

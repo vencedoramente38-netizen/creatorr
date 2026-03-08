@@ -14,6 +14,13 @@ export interface Product {
   concurrency: 'Baixa' | 'Média' | 'Alta';
   deliveryTime: string;
   supplierRating: number;
+  estimatedProfit?: string;
+  trend?: string;
+  icon?: string;
+  tags?: string;
+  description?: string;
+  estimatedViews?: string;
+  estimatedOrders?: number;
 }
 
 export interface DashboardStats {

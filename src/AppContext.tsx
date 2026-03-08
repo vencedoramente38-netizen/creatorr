@@ -31,7 +31,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('products');
+    const saved = window.localStorage.getItem('adminProducts');
     return saved ? JSON.parse(saved) : PRODUCTS_SEED;
   });
 
@@ -67,8 +67,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('notifications');
     return saved ? JSON.parse(saved) : [
       { id: '1', title: "Bem-vindo!", message: "Login realizado com sucesso.", time: "19:02", read: false },
-      { id: '2', title: "Produto favoritado!", message: "Kit de skincare adicionado aos favoritos.", time: "18:45", read: false },
-      { id: '3', title: "Prompt gerado!", message: "Seu prompt V03 foi gerado com sucesso.", time: "18:30", read: false },
+      { id: '2', title: "Produto favoritado!", message: "Kit de skincare adicionado aos favoritos.", time: "18:45", read: false }
     ];
   });
 
@@ -102,7 +101,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products));
+    window.localStorage.setItem('adminProducts', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {

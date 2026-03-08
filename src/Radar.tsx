@@ -204,378 +204,313 @@ const Radar: React.FC = () => {
       </div>
 
       {/* Product Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "24px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
         {filteredProducts.map((product) => (
-          <motion.div
+          <div
             key={product.id}
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
             style={{
-              position: "relative",
-              backgroundColor: "#141414",
-              border: "1px solid #27272a",
+              background: "#111111",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderTop: `3px solid ${product.viralScore > 94 ? '#DEDEDE' : product.viralScore > 90 ? '#a855f7' : '#06b6d4'}`,
               borderRadius: "16px",
-              overflow: "hidden",
-              transition: "all 0.2s"
+              padding: "20px",
+              cursor: "pointer",
+              transition: "box-shadow 0.2s",
             }}
+            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4)")}
+            onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
+            onClick={() => setSelectedProduct(product)}
           >
-            {/* Image Section */}
-            <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden" }}>
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                style={{ width: "100%", height: "100%", objectCover: "cover", transition: "transform 0.5s" }}
-              />
-
-              {/* Overlay on Hover */}
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                backgroundColor: "rgba(0,0,0,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 0,
-                transition: "opacity 0.3s",
-                cursor: "pointer"
-              }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
-                onClick={() => setSelectedProduct(product)}
-              >
-                <button
-                  style={{
-                    backgroundColor: "#DEDEDE",
-                    color: "#050505",
-                    fontWeight: "bold",
-                    paddingLeft: "24px",
-                    paddingRight: "24px",
-                    paddingTop: "10px",
-                    paddingBottom: "10px",
-                    borderRadius: "9999px",
-                    border: "none",
-                    cursor: "pointer"
-                  }}
-                >
-                  Ver Detalhes
-                </button>
+            {/* Header: thumbnail + name + score */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1, minWidth: 0 }}>
+                <div style={{ width: "52px", height: "52px", borderRadius: "10px", overflow: "hidden", background: "#1a1a1a", flexShrink: 0 }}>
+                  <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontWeight: 700, fontSize: "13px", margin: "0 0 2px 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</p>
+                  <p style={{ fontSize: "11px", color: "#71717a", margin: 0 }}>{product.category}</p>
+                </div>
               </div>
-
-              {/* Floating Buttons */}
-              <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                    transition: "all 0.2s",
-                    cursor: "pointer",
-                    border: "none",
-                    backgroundColor: favorites.includes(product.id) ? "#DEDEDE" : "rgba(255,255,255,0.9)",
-                    color: favorites.includes(product.id) ? "#050505" : "#18181b"
-                  }}
-                >
-                  <Icon name="heart" size={18} style={{ fill: favorites.includes(product.id) ? "currentColor" : "none" }} />
-                </button>
-                <button
-                  onClick={(e) => handleDownloadImage(e, product)}
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(255,255,255,0.9)",
-                    color: "#18181b",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                    border: "none",
-                    cursor: "pointer"
-                  }}
-                >
-                  <Icon name="download" size={18} />
-                </button>
+              <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "10px" }}>
+                <p style={{ fontSize: "26px", fontWeight: 900, margin: "0 0 2px 0", lineHeight: 1 }}>{product.viralScore}</p>
+                <p style={{ fontSize: "9px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: 0 }}>Score</p>
               </div>
             </div>
 
-            {/* Content Section */}
-            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em", color: "#DEDEDE", backgroundColor: "rgba(222,222,222,0.1)", paddingLeft: "8px", paddingRight: "8px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "9999px" }}>
-                  {product.category}
+            {/* Separator */}
+            <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "14px" }} />
+
+            {/* Metrics 2x2 */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "12px" }}>
+              {[
+                { label: "Preço", value: product.priceText, color: "#DEDEDE" },
+                { label: "Lucro Est.", value: `R$ ${(parseFloat(product.priceText.replace('R$ ', '').replace(',', '.') || '0') * (product.commission / 100)).toFixed(2)}`, color: "#10b981" },
+                { label: "Views/mês", value: `${(product.salesPerDay * 30).toLocaleString()}`, color: "#a855f7" },
+                { label: "Pedidos/mês", value: String(product.salesPerDay * 30), color: "#06b6d4" },
+              ].map(m => (
+                <div key={m.label} style={{ background: "#1a1a1a", borderRadius: "8px", padding: "8px 10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <p style={{ fontSize: "9px", color: "#71717a", margin: "0 0 3px 0", textTransform: "uppercase", fontWeight: "bold" }}>{m.label}</p>
+                  <p style={{ fontSize: "13px", fontWeight: "bold", margin: 0, color: m.color }}>{m.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Tags */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "12px" }}>
+              {['TikTok', 'Trending', 'Hot'].map(tag => (
+                <span key={tag} style={{ fontSize: "9px", background: "rgba(255,255,255,0.05)", padding: "3px 8px", borderRadius: "20px", color: "#a1a1aa", fontWeight: "bold" }}>
+                  #{tag}
                 </span>
-                <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: "bold", color: "#eab308" }}>
-                  <Icon name="star" size={12} style={{ fill: "currentColor" }} />
-                  {product.rating} • {product.sales.toLocaleString()} vendas
-                </div>
-              </div>
-
-              <h3 style={{ fontWeight: "bold", fontSize: "14px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", height: "40px" }}>
-                {product.name}
-              </h3>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>
-                  <span>Score Viral</span>
-                  <span>{product.viralScore}%</span>
-                </div>
-                <div style={{ height: "6px", width: "100%", backgroundColor: "#27272a", borderRadius: "9999px", overflow: "hidden" }}>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${product.viralScore}%` }}
-                    style={{
-                      height: "100%",
-                      borderRadius: "9999px",
-                      backgroundColor: product.viralScore > 90 ? "#10b981" : product.viralScore > 80 ? "#DEDEDE" : "#eab308"
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "8px" }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
-                  <span style={{ fontSize: "20px", fontWeight: 900 }}>{product.priceText}</span>
-                </div>
-                <div style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#10b981", fontSize: "10px", fontWeight: "bold", paddingLeft: "8px", paddingRight: "8px", paddingTop: "4px", paddingBottom: "4px", borderRadius: "4px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
-                  {product.commission}% comissão
-                </div>
-              </div>
+              ))}
             </div>
-          </motion.div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={e => { e.stopPropagation(); setSelectedProduct(product); }}
+                style={{ flex: 1, padding: "9px", background: "rgba(222,222,222,0.08)", border: "1px solid rgba(222,222,222,0.15)", borderRadius: "8px", color: "#DEDEDE", fontSize: "11px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Ver Detalhes
+              </button>
+              <button
+                onClick={e => e.stopPropagation()}
+                style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", color: "#71717a", fontSize: "11px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Criar Vídeo
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Product Detail Modal */}
       <AnimatePresence>
-        {selectedProduct && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedProduct(null)}
-              style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              style={{
-                position: "relative",
-                width: "100%",
-                maxWidth: "896px",
-                maxHeight: "90vh",
-                backgroundColor: "#141414",
-                border: "1px solid #27272a",
-                borderRadius: "24px",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
-              }}
-            >
-              {/* Modal Header */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px", borderBottom: "1px solid #27272a" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <div style={{ width: "64px", height: "64px", borderRadius: "12px", overflow: "hidden", border: "1px solid #27272a" }}>
-                    <img src={selectedProduct.imageUrl} alt="" style={{ width: "100%", height: "100%", objectCover: "cover" }} />
-                  </div>
-                  <div>
-                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", textTransform: "uppercase", letterSpacing: "0.1em" }}>{selectedProduct.category}</span>
-                    <h2 style={{ fontSize: "20px", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedProduct.name}</h2>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: "bold", color: "#eab308" }}>
-                        <Icon name="star" size={12} style={{ fill: "currentColor" }} />
-                        {selectedProduct.rating} • {selectedProduct.sales.toLocaleString()} vendas
+        {
+          selectedProduct && (
+            <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedProduct(null)}
+                style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "896px",
+                  maxHeight: "90vh",
+                  backgroundColor: "#141414",
+                  border: "1px solid #27272a",
+                  borderRadius: "24px",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
+                }}
+              >
+                {/* Modal Header */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px", borderBottom: "1px solid #27272a" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <div style={{ width: "64px", height: "64px", borderRadius: "12px", overflow: "hidden", border: "1px solid #27272a" }}>
+                      <img src={selectedProduct.imageUrl} alt="" style={{ width: "100%", height: "100%", objectCover: "cover" }} />
+                    </div>
+                    <div>
+                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", textTransform: "uppercase", letterSpacing: "0.1em" }}>{selectedProduct.category}</span>
+                      <h2 style={{ fontSize: "20px", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedProduct.name}</h2>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: "bold", color: "#eab308" }}>
+                          <Icon name="star" size={12} style={{ fill: "currentColor" }} />
+                          {selectedProduct.rating} • {selectedProduct.sales.toLocaleString()} vendas
+                        </div>
+                        <span style={{ fontSize: "10px", fontWeight: "bold", color: "#a1a1aa", backgroundColor: "#27272a", paddingLeft: "8px", paddingRight: "8px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "4px", textTransform: "uppercase" }}>
+                          Concorrência {selectedProduct.concurrency}
+                        </span>
                       </div>
-                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#a1a1aa", backgroundColor: "#27272a", paddingLeft: "8px", paddingRight: "8px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "4px", textTransform: "uppercase" }}>
-                        Concorrência {selectedProduct.concurrency}
-                      </span>
                     </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => setSelectedProduct(null)}
-                  style={{ padding: "8px", color: "#71717a", cursor: "pointer", backgroundColor: "transparent", border: "none", borderRadius: "50%", transition: "all 0.2s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#27272a", e.currentTarget.style.color = "white")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent", e.currentTarget.style.color = "#71717a")}
-                >
-                  <Icon name="x" size={24} />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "32px" }}>
-                {/* Top Info Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "16px" }}>
-                  <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                    <Icon name="trendingUp" size={20} style={{ color: "#10b981", marginBottom: "8px" }} />
-                    <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.viralScore}</span>
-                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Score Viral</span>
-                  </div>
-                  <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                    <Icon name="shoppingCart" size={20} style={{ color: "#DEDEDE", marginBottom: "8px" }} />
-                    <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.salesPerDay}</span>
-                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Vendas/Dia</span>
-                  </div>
-                  <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                    <Icon name="percent" size={20} style={{ color: "#a855f7", marginBottom: "8px" }} />
-                    <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.margin}%</span>
-                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Margem Est.</span>
-                  </div>
-                  <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                    <Icon name="dollarSign" size={20} style={{ color: "#f97316", marginBottom: "8px" }} />
-                    <span style={{ fontSize: "24px", fontWeight: 900 }}>R$ {(parseFloat(selectedProduct.priceText.replace('R$ ', '').replace(',', '.')) * (selectedProduct.commission / 100)).toFixed(2)}</span>
-                    <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Comissão R$</span>
-                  </div>
+                  <button
+                    onClick={() => setSelectedProduct(null)}
+                    style={{ padding: "8px", color: "#71717a", cursor: "pointer", backgroundColor: "transparent", border: "none", borderRadius: "50%", transition: "all 0.2s" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#27272a", e.currentTarget.style.color = "white")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent", e.currentTarget.style.color = "#71717a")}
+                  >
+                    <Icon name="x" size={24} />
+                  </button>
                 </div>
 
-                {/* Profit Projection */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Icon name="trendingUp" size={20} style={{ color: "#DEDEDE" }} />
-                    Projeção de Lucro
-                  </h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                    {[
-                      { label: 'Início', sales: 10, bgcolor: "#141414" },
-                      { label: 'Crescimento', sales: 100, bgcolor: "#141414", border: "rgba(222,222,222,0.2)" },
-                      { label: 'Escala', sales: 1000, bgcolor: "rgba(222,222,222,0.05)", border: "rgba(222,222,222,0.3)" },
-                    ].map((col) => {
-                      const commPerSale = parseFloat(selectedProduct.priceText.replace('R$ ', '').replace(',', '.')) * (selectedProduct.commission / 100);
-                      return (
-                        <div key={col.label} style={{ padding: "20px", borderRadius: "24px", border: "1px solid #27272a", backgroundColor: col.bgcolor, borderColor: col.border || "#27272a" }}>
-                          <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "12px" }}>{col.label} ({col.sales} vendas)</p>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px" }}>
-                              <span style={{ color: "#a1a1aa" }}>Comissão/venda</span>
-                              <span style={{ fontWeight: "bold" }}>R$ {commPerSale.toFixed(2)}</span>
+                {/* Modal Body */}
+                <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "32px" }}>
+                  {/* Top Info Grid */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "16px" }}>
+                    <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                      <Icon name="trendingUp" size={20} style={{ color: "#10b981", marginBottom: "8px" }} />
+                      <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.viralScore}</span>
+                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Score Viral</span>
+                    </div>
+                    <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                      <Icon name="shoppingCart" size={20} style={{ color: "#DEDEDE", marginBottom: "8px" }} />
+                      <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.salesPerDay}</span>
+                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Vendas/Dia</span>
+                    </div>
+                    <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                      <Icon name="percent" size={20} style={{ color: "#a855f7", marginBottom: "8px" }} />
+                      <span style={{ fontSize: "24px", fontWeight: 900 }}>{selectedProduct.margin}%</span>
+                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Margem Est.</span>
+                    </div>
+                    <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "#141414", border: "1px solid #27272a", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                      <Icon name="dollarSign" size={20} style={{ color: "#f97316", marginBottom: "8px" }} />
+                      <span style={{ fontSize: "24px", fontWeight: 900 }}>R$ {(parseFloat(selectedProduct.priceText.replace('R$ ', '').replace(',', '.')) * (selectedProduct.commission / 100)).toFixed(2)}</span>
+                      <span style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginTop: "4px" }}>Comissão R$</span>
+                    </div>
+                  </div>
+
+                  {/* Profit Projection */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Icon name="trendingUp" size={20} style={{ color: "#DEDEDE" }} />
+                      Projeção de Lucro
+                    </h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                      {[
+                        { label: 'Início', sales: 10, bgcolor: "#141414" },
+                        { label: 'Crescimento', sales: 100, bgcolor: "#141414", border: "rgba(222,222,222,0.2)" },
+                        { label: 'Escala', sales: 1000, bgcolor: "rgba(222,222,222,0.05)", border: "rgba(222,222,222,0.3)" },
+                      ].map((col) => {
+                        const commPerSale = parseFloat(selectedProduct.priceText.replace('R$ ', '').replace(',', '.')) * (selectedProduct.commission / 100);
+                        return (
+                          <div key={col.label} style={{ padding: "20px", borderRadius: "24px", border: "1px solid #27272a", backgroundColor: col.bgcolor, borderColor: col.border || "#27272a" }}>
+                            <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "12px" }}>{col.label} ({col.sales} vendas)</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px" }}>
+                                <span style={{ color: "#a1a1aa" }}>Comissão/venda</span>
+                                <span style={{ fontWeight: "bold" }}>R$ {commPerSale.toFixed(2)}</span>
+                              </div>
+                              <div style={{ height: "1px", backgroundColor: "#27272a", marginTop: "8px", marginBottom: "8px" }} />
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                                <span style={{ fontSize: "12px", color: "#a1a1aa" }}>Lucro Total</span>
+                                <span style={{ fontSize: "20px", fontWeight: 900, color: "#10b981" }}>R$ {(commPerSale * col.sales).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              </div>
                             </div>
-                            <div style={{ height: "1px", backgroundColor: "#27272a", marginTop: "8px", marginBottom: "8px" }} />
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                              <span style={{ fontSize: "12px", color: "#a1a1aa" }}>Lucro Total</span>
-                              <span style={{ fontSize: "20px", fontWeight: 900, color: "#10b981" }}>R$ {(commPerSale * col.sales).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Recommended Creatives */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Icon name="palette" size={20} style={{ color: "#DEDEDE" }} />
+                      Criativos Recomendados
+                    </h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} style={{ aspectRatio: "9/16", borderRadius: "12px", backgroundColor: "#141414", border: "1px solid #27272a", overflow: "hidden", position: "relative", cursor: "pointer" }}>
+                          <img src={`https://picsum.photos/seed/${selectedProduct.id}-${i}/400/700`} alt="" style={{ width: "100%", height: "100%", objectCover: "cover", opacity: 0.5 }} />
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+                              <Icon name="video" size={20} />
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Recommended Creatives */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Icon name="palette" size={20} style={{ color: "#DEDEDE" }} />
-                    Criativos Recomendados
-                  </h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} style={{ aspectRatio: "9/16", borderRadius: "12px", backgroundColor: "#141414", border: "1px solid #27272a", overflow: "hidden", position: "relative", cursor: "pointer" }}>
-                        <img src={`https://picsum.photos/seed/${selectedProduct.id}-${i}/400/700`} alt="" style={{ width: "100%", height: "100%", objectCover: "cover", opacity: 0.5 }} />
-                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
-                            <Icon name="video" size={20} />
-                          </div>
+                  {/* Delivery & Supplier */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", borderRadius: "24px", backgroundColor: "#141414", border: "1px solid #27272a" }}>
+                      <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#27272a", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
+                        <Icon name="truck" size={24} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>Prazo de Entrega</p>
+                        <p style={{ fontWeight: "bold" }}>{selectedProduct.deliveryTime}</p>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", borderRadius: "24px", backgroundColor: "#141414", border: "1px solid #27272a" }}>
+                      <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#27272a", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
+                        <Icon name="store" size={24} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>Fornecedor</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: "bold" }}>
+                          {selectedProduct.supplierRating}/5 <Icon name="star" size={12} style={{ fill: "currentColor", color: "#eab308" }} />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Delivery & Supplier */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", borderRadius: "24px", backgroundColor: "#141414", border: "1px solid #27272a" }}>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#27272a", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
-                      <Icon name="truck" size={24} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>Prazo de Entrega</p>
-                      <p style={{ fontWeight: "bold" }}>{selectedProduct.deliveryTime}</p>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "16px", borderRadius: "24px", backgroundColor: "#141414", border: "1px solid #27272a" }}>
-                    <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#27272a", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
-                      <Icon name="store" size={24} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>Fornecedor</p>
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: "bold" }}>
-                        {selectedProduct.supplierRating}/5 <Icon name="star" size={12} style={{ fill: "currentColor", color: "#eab308" }} />
-                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Modal Footer */}
-              <div style={{ padding: "24px", borderTop: "1px solid #27272a", backgroundColor: "#141414", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <button
-                  onClick={() => handleAffiliate(selectedProduct)}
-                  style={{
-                    width: "100%",
-                    backgroundColor: "#DEDEDE",
-                    color: "#050505",
-                    fontWeight: 900,
-                    paddingTop: "16px",
-                    paddingBottom: "16px",
-                    borderRadius: "16px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    transition: "all 0.2s"
-                  }}
-                >
-                  <Icon name="link" size={20} /> Afiliar-se agora
-                </button>
-                <div style={{ display: "flex", gap: "8px" }}>
+                {/* Modal Footer */}
+                <div style={{ padding: "24px", borderTop: "1px solid #27272a", backgroundColor: "#141414", display: "flex", flexDirection: "column", gap: "12px" }}>
                   <button
-                    onClick={() => { addNotification("Produto selecionado!", "Redirecionando para o Creatoria."); }}
-                    style={{ flex: 1, height: "56px", backgroundColor: "#27272a", color: "white", fontWeight: "bold", borderRadius: "16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-                  >
-                    <Icon name="video" size={18} />
-                    Criar Vídeo
-                  </button>
-                  <button
-                    onClick={(e) => handleDownloadImage(e, selectedProduct)}
-                    style={{ width: "56px", height: "56px", backgroundColor: "#27272a", color: "white", borderRadius: "16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Icon name="download" size={18} />
-                  </button>
-                  <button
-                    onClick={() => toggleFavorite(selectedProduct.id)}
+                    onClick={() => handleAffiliate(selectedProduct)}
                     style={{
-                      width: "56px",
-                      height: "56px",
+                      width: "100%",
+                      backgroundColor: "#DEDEDE",
+                      color: "#050505",
+                      fontWeight: 900,
+                      paddingTop: "16px",
+                      paddingBottom: "16px",
                       borderRadius: "16px",
                       border: "none",
                       cursor: "pointer",
+                      fontSize: "16px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: favorites.includes(selectedProduct.id) ? "#DEDEDE" : "#27272a",
-                      color: favorites.includes(selectedProduct.id) ? "#050505" : "white"
+                      gap: "8px",
+                      transition: "all 0.2s"
                     }}
                   >
-                    <Icon name="bookmark" size={18} style={{ fill: favorites.includes(selectedProduct.id) ? "currentColor" : "none" }} />
+                    <Icon name="link" size={20} /> Afiliar-se agora
                   </button>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      onClick={() => { addNotification("Produto selecionado!", "Redirecionando para o Creatoria."); }}
+                      style={{ flex: 1, height: "56px", backgroundColor: "#27272a", color: "white", fontWeight: "bold", borderRadius: "16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+                    >
+                      <Icon name="video" size={18} />
+                      Criar Vídeo
+                    </button>
+                    <button
+                      onClick={(e) => handleDownloadImage(e, selectedProduct)}
+                      style={{ width: "56px", height: "56px", backgroundColor: "#27272a", color: "white", borderRadius: "16px", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                    >
+                      <Icon name="download" size={18} />
+                    </button>
+                    <button
+                      onClick={() => toggleFavorite(selectedProduct.id)}
+                      style={{
+                        width: "56px",
+                        height: "56px",
+                        borderRadius: "16px",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: favorites.includes(selectedProduct.id) ? "#DEDEDE" : "#27272a",
+                        color: favorites.includes(selectedProduct.id) ? "#050505" : "white"
+                      }}
+                    >
+                      <Icon name="bookmark" size={18} style={{ fill: favorites.includes(selectedProduct.id) ? "currentColor" : "none" }} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
+              </motion.div>
+            </div>
+          )
+        }
+      </AnimatePresence >
+    </div >
   );
 };
 

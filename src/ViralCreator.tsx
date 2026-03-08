@@ -1,313 +1,246 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, Sparkles, Wand2, CheckCircle2, AlertCircle, Loader2, Send, Languages, Palette, Target } from 'lucide-react';
-import { HoverBorderGradient } from './components/ui/hover-border-gradient';
-import { cn } from './lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 const STEPS = [
-    { id: 1, label: 'Nicho', icon: Target },
-    { id: 2, label: 'Estilo', icon: Palette },
-    { id: 3, label: 'Prompts AI', icon: Wand2 },
-    { id: 4, label: 'Review', icon: CheckCircle2 },
+    { id: 1, label: 'Nicho' },
+    { id: 2, label: 'Estilo' },
+    { id: 3, label: 'Prompts AI' },
+    { id: 4, label: 'Review' },
 ];
 
-const NICHES = [
-    "Curiosidades",
-    "Finanças/Investimentos",
-    "Saúde/Bem-estar",
-    "Tecnologia",
-    "Entretenimento",
-    "Motivação",
-    "Educação",
-    "Estilo de Vida",
-    "Outros"
-];
+const NICHES = ["Curiosidades", "Finanças/Investimentos", "Saúde/Bem-estar", "Tecnologia", "Entretenimento", "Motivação", "Educação", "Estilo de Vida", "Outros"];
+const STYLES = ["Moderno / High Tech", "Minimalista", "Vibrante / Dinâmico", "Sombrio / Misterioso", "Estético / Calmo", "Infantil / Lúdico"];
+const LANGUAGES = ["Português", "Inglês", "Espanhol"];
 
-const STYLES = [
-    "Moderno / High Tech",
-    "Minimalista",
-    "Vibrante / Dinâmico",
-    "Sombrio / Misterioso",
-    "Estético / Calmo",
-    "Infantil / Lúdico"
-];
+// Re-export helper from App (or define inline since App exports it)
+function RainbowButton({ onClick, children, disabled, style = {} }: {
+    onClick?: () => void; children: React.ReactNode; disabled?: boolean; style?: React.CSSProperties;
+}) {
+    return (
+        <button onClick={onClick} disabled={disabled} className="rainbow-btn"
+            style={{ padding: "14px 32px", fontSize: 16, fontWeight: 700, minWidth: 180, borderRadius: 14, ...style }}>
+            {children}
+        </button>
+    );
+}
+
+function PrimaryBtn({ onClick, children, style = {}, disabled }: {
+    onClick?: () => void; children: React.ReactNode; style?: React.CSSProperties; disabled?: boolean;
+}) {
+    return (
+        <button onClick={onClick} disabled={disabled} className="neon-btn" style={{
+            position: "relative", overflow: "hidden",
+            background: disabled ? "#141414" : "#DEDEDE",
+            color: disabled ? "#71717a" : "#050505",
+            border: "none", borderRadius: "12px",
+            fontWeight: "bold", cursor: disabled ? "not-allowed" : "pointer",
+            fontFamily: "inherit", ...style,
+        }}>
+            <span className="neon-top" style={{ position: "absolute", height: 1, opacity: 0, top: 0, left: 0, right: 0, width: "75%", margin: "0 auto", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent)", transition: "opacity 0.5s ease", pointerEvents: "none" }} />
+            <span style={{ position: "absolute", height: 1, opacity: 0.3, bottom: 0, left: 0, right: 0, width: "75%", margin: "0 auto", background: "linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent)", pointerEvents: "none" }} />
+            {children}
+        </button>
+    );
+}
 
 export function ViralCreator() {
     const [currentStep, setCurrentStep] = useState(1);
     const [generating, setGenerating] = useState(false);
+    const [generated, setGenerated] = useState(false);
     const [formData, setFormData] = useState({
-        niche: '',
-        style: '',
-        targetAudience: '',
-        language: 'Português',
+        niche: '', style: '', targetAudience: '', language: 'Português',
     });
 
-    const handleNext = () => {
-        if (currentStep < 4) setCurrentStep(currentStep + 1);
+    const handleNext = () => { if (currentStep < 4) setCurrentStep(currentStep + 1); };
+    const handleBack = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
+
+    const handleGenerate = async () => {
+        setGenerating(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setGenerating(false);
+        setGenerated(true);
     };
 
-    const handleBack = () => {
-        if (currentStep > 1) setCurrentStep(currentStep - 1);
+    const cardStyle: React.CSSProperties = {
+        background: "#111111", border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 16, padding: 24,
+    };
+
+    const chipBase: React.CSSProperties = {
+        padding: "10px 16px", borderRadius: 12, border: "1px solid",
+        fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
+        fontFamily: "inherit",
     };
 
     const renderStep = () => {
         switch (currentStep) {
             case 1:
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                    >
-                        <div className="space-y-4">
-                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Selecione seu Nicho</label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {NICHES.map((niche) => (
-                                    <button
-                                        key={niche}
-                                        onClick={() => setFormData({ ...formData, niche })}
-                                        className={cn(
-                                            "p-4 rounded-xl text-sm font-medium transition-all duration-300 border",
-                                            formData.niche === niche
-                                                ? "bg-primary/20 border-primary text-primary shadow-[0_0_20px_rgba(255,35,108,0.2)]"
-                                                : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-800/50"
-                                        )}
-                                    >
+                    <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                        <div style={cardStyle}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 16 }}>Selecione seu Nicho</p>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10 }}>
+                                {NICHES.map(niche => (
+                                    <button key={niche} onClick={() => setFormData({ ...formData, niche })} style={{
+                                        ...chipBase,
+                                        background: formData.niche === niche ? "rgba(222,222,222,0.1)" : "transparent",
+                                        borderColor: formData.niche === niche ? "#DEDEDE" : "#27272a",
+                                        color: formData.niche === niche ? "#DEDEDE" : "#a1a1aa",
+                                    }}>
                                         {niche}
                                     </button>
                                 ))}
                             </div>
-                        </div>
 
-                        <div className="space-y-4 pt-4">
-                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Público Alvo</label>
-                            <input
-                                type="text"
-                                value={formData.targetAudience}
-                                onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
-                                placeholder="Ex: Jovens interessados em investimento"
-                                className="w-full p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-primary transition-all"
-                            />
+                            <div style={{ marginTop: 24 }}>
+                                <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 12 }}>Público-alvo</p>
+                                <textarea
+                                    value={formData.targetAudience}
+                                    onChange={e => setFormData({ ...formData, targetAudience: e.target.value })}
+                                    placeholder="Descreva seu público-alvo (ex: jovens de 18-25 anos interessados em empreendedorismo)"
+                                    style={{ width: "100%", minHeight: 80, background: "#050505", border: "1px solid #27272a", borderRadius: 10, color: "white", padding: "12px", fontSize: 14, outline: "none", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+                                />
+                            </div>
                         </div>
                     </motion.div>
                 );
 
             case 2:
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                    >
-                        <div className="space-y-4">
-                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Estilo Visual</label>
-                            <div className="grid grid-cols-2 gap-3">
-                                {STYLES.map((style) => (
-                                    <button
-                                        key={style}
-                                        onClick={() => setFormData({ ...formData, style })}
-                                        className={cn(
-                                            "p-4 rounded-xl text-sm font-medium transition-all duration-300 border",
-                                            formData.style === style
-                                                ? "bg-primary/20 border-primary text-primary shadow-[0_0_20px_rgba(255,35,108,0.2)]"
-                                                : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-800/50"
-                                        )}
-                                    >
-                                        {style}
+                    <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                        <div style={cardStyle}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 16 }}>Estilo Visual</p>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10, marginBottom: 24 }}>
+                                {STYLES.map(s => (
+                                    <button key={s} onClick={() => setFormData({ ...formData, style: s })} style={{
+                                        ...chipBase,
+                                        background: formData.style === s ? "rgba(222,222,222,0.1)" : "transparent",
+                                        borderColor: formData.style === s ? "#DEDEDE" : "#27272a",
+                                        color: formData.style === s ? "#DEDEDE" : "#a1a1aa",
+                                    }}>
+                                        {s}
                                     </button>
                                 ))}
                             </div>
-                        </div>
 
-                        <div className="space-y-4 pt-4">
-                            <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Idioma Principal</label>
-                            <select
-                                value={formData.language}
-                                onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                                className="w-full p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-primary transition-all appearance-none"
-                            >
-                                <option value="Português">Português</option>
-                                <option value="Inglês">Inglês</option>
-                                <option value="Espanhol">Espanhol</option>
-                            </select>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 12 }}>Idioma</p>
+                            <div style={{ display: "flex", gap: 10 }}>
+                                {LANGUAGES.map(lang => (
+                                    <button key={lang} onClick={() => setFormData({ ...formData, language: lang })} style={{
+                                        ...chipBase,
+                                        background: formData.language === lang ? "rgba(222,222,222,0.1)" : "transparent",
+                                        borderColor: formData.language === lang ? "#DEDEDE" : "#27272a",
+                                        color: formData.language === lang ? "#DEDEDE" : "#a1a1aa",
+                                    }}>
+                                        {lang}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </motion.div>
                 );
 
             case 3:
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="flex flex-col items-center justify-center py-12 space-y-6 text-center"
-                    >
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                            <div className="relative bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
-                                {generating ? (
-                                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                                ) : (
-                                    <Sparkles className="w-12 h-12 text-primary" />
-                                )}
-                            </div>
+                    <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                        <div style={cardStyle}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 16 }}>Prompts Gerados por IA</p>
+                            {['Hook viral de 3 segundos', 'Roteiro completo para 60s', 'Chamada para ação poderosa'].map((prompt, i) => (
+                                <div key={i} style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 10, padding: "14px 16px", marginBottom: 10 }}>
+                                    <p style={{ fontSize: 11, color: "#71717a", textTransform: "uppercase", fontWeight: 700, margin: "0 0 6px 0" }}>Prompt {i + 1}</p>
+                                    <p style={{ fontSize: 14, color: "#a1a1aa", margin: 0, lineHeight: 1.6 }}>
+                                        {prompt}: {formData.niche || "seu nicho"} para {formData.targetAudience || "seu público"} — estilo {formData.style || "único"}.
+                                    </p>
+                                </div>
+                            ))}
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-bold">Pronto para gerar?</h3>
-                            <p className="text-zinc-400 max-w-sm">
-                                Nossa IA vai criar prompts personalizados baseados nas suas escolhas para o Flow VEO3.
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => {
-                                setGenerating(true);
-                                setTimeout(() => {
-                                    setGenerating(false);
-                                    handleNext();
-                                }, 3000);
-                            }}
-                            disabled={generating}
-                            className="px-8 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold transition-all shadow-[0_0_20px_rgba(255,35,108,0.3)] disabled:opacity-50"
-                        >
-                            {generating ? "Gerando E estratégia..." : "Gerar Prompts e Estratégia"}
-                        </button>
                     </motion.div>
                 );
 
             case 4:
                 return (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="space-y-6"
-                    >
-                        <div className="bg-primary/10 border border-primary/20 p-6 rounded-2xl flex items-start space-x-4">
-                            <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                            <div className="space-y-1">
-                                <h4 className="font-bold">Estratégia Finalizada!</h4>
-                                <p className="text-sm text-zinc-400">Tudo pronto para você começar a criar seu conteúdo viral.</p>
+                    <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                        <div style={cardStyle}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#71717a", textTransform: "uppercase", marginBottom: 16 }}>Revisão Final</p>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
+                                {[
+                                    { label: "Nicho", value: formData.niche || "—" },
+                                    { label: "Estilo", value: formData.style || "—" },
+                                    { label: "Idioma", value: formData.language },
+                                    { label: "Público", value: formData.targetAudience || "—" },
+                                ].map(item => (
+                                    <div key={item.label} style={{ background: "#0a0a0a", borderRadius: 10, padding: "12px 14px", border: "1px solid #1a1a1a" }}>
+                                        <p style={{ fontSize: 10, color: "#71717a", textTransform: "uppercase", fontWeight: 700, margin: "0 0 4px 0" }}>{item.label}</p>
+                                        <p style={{ fontSize: 13, fontWeight: 600, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.value}</p>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
 
-                        <div className="space-y-4">
-                            <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-4">
-                                <h5 className="font-semibold text-primary">Instruções para o Flow VEO3</h5>
-                                <div className="bg-black/50 p-4 rounded-xl border border-zinc-800 font-mono text-sm text-zinc-300">
-                                    <p>Copie este código e cole no seu prompt do Flow VEO3:</p>
-                                    <pre className="mt-4 whitespace-pre-wrap">
-                                        {`STYL_ID: ${formData.style}\nNICHE: ${formData.niche}\nAUDIENCE: ${formData.targetAudience}\nLANG: ${formData.language}\nFORCE_VIRAL_HOOK: TRUE\nDYNAMIC_SUBTITLES: ENABLED`}
-                                    </pre>
+                            {generated && (
+                                <div style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 12, padding: "14px 16px", marginBottom: 20, color: "#10b981", fontSize: 14, fontWeight: 600, textAlign: "center" }}>
+                                    ✅ Conteúdo viral gerado com sucesso!
                                 </div>
+                            )}
+
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                                <RainbowButton onClick={handleGenerate} disabled={generating} style={{ minWidth: 220 }}>
+                                    {generating ? "⏳ Gerando..." : generated ? "🔄 Gerar Novamente" : "🚀 Gerar Viral!"}
+                                </RainbowButton>
                             </div>
                         </div>
-
-                        <HoverBorderGradient
-                            containerClassName="w-full"
-                            className="w-full flex items-center justify-center space-x-2 py-4 text-lg font-medium"
-                            onClick={() => window.open('https://flow.veo3.ai', '_blank')}
-                        >
-                            <span>Ir para o Flow VEO3</span>
-                            <Rocket className="w-5 h-5 ml-2" />
-                        </HoverBorderGradient>
                     </motion.div>
                 );
 
-            default:
-                return null;
+            default: return null;
         }
     };
 
     return (
-        <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-8">
-            <header className="space-y-4 text-center">
-                <div className="inline-flex items-center space-x-3 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-400">
-                    <Rocket className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium uppercase tracking-widest">Viral Creator AI</span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-white via-primary to-primary bg-clip-text text-transparent italic">
-                    DECOLE SEU CONTEÚDO
-                </h1>
-                <p className="text-zinc-400 text-lg">
-                    O guia definitivo para criar canais dark de alta performance.
-                </p>
-            </header>
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 16px 80px", color: "white" }}>
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+                <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 8px 0" }}>⚡ Viral Creator</h1>
+                <p style={{ color: "#71717a", margin: 0, fontSize: 15 }}>Crie conteúdo viral com o poder da IA em 4 passos simples</p>
+            </div>
 
-            {/* Stepper Progress */}
-            <div className="flex justify-between items-center max-w-2xl mx-auto px-4 relative">
-                <div className="absolute top-1/2 left-0 w-full h-px bg-zinc-800 -translate-y-1/2 -z-10" />
-                {STEPS.map((step) => {
-                    const Icon = step.icon;
-                    const isActive = currentStep >= step.id;
-                    const isCurrent = currentStep === step.id;
-
-                    return (
-                        <div key={step.id} className="flex flex-col items-center space-y-2">
-                            <motion.div
-                                animate={{
-                                    scale: isCurrent ? 1.2 : 1,
-                                    backgroundColor: isActive ? '#FF236C' : '#18181b',
-                                }}
-                                className={cn(
-                                    "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300",
-                                    isActive ? "border-primary shadow-[0_0_15px_rgba(255,35,108,0.5)]" : "border-zinc-800"
-                                )}
-                            >
-                                <Icon className={cn("w-5 h-5", isActive ? "text-white" : "text-zinc-600")} />
-                            </motion.div>
-                            <span className={cn(
-                                "text-[10px] uppercase tracking-tighter font-bold",
-                                isActive ? "text-primary" : "text-zinc-600"
-                            )}>
-                                {step.label}
-                            </span>
+            {/* Stepper */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 32 }}>
+                {STEPS.map((step, i) => (
+                    <React.Fragment key={step.id}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <div style={{
+                                width: 36, height: 36, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                                border: "2px solid", fontSize: 13, fontWeight: 700,
+                                borderColor: currentStep === step.id ? "#DEDEDE" : currentStep > step.id ? "#10b981" : "#27272a",
+                                background: currentStep === step.id ? "rgba(222,222,222,0.12)" : currentStep > step.id ? "rgba(16,185,129,0.12)" : "transparent",
+                                color: currentStep === step.id ? "#DEDEDE" : currentStep > step.id ? "#10b981" : "#52525b",
+                            }}>
+                                {currentStep > step.id ? "✓" : step.id}
+                            </div>
+                            <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: currentStep === step.id ? "#DEDEDE" : "#52525b" }}>{step.label}</span>
                         </div>
-                    );
-                })}
+                        {i < STEPS.length - 1 && (
+                            <div style={{ width: 32, height: 1, background: currentStep > step.id ? "#10b981" : "#27272a", marginBottom: 20, flexShrink: 0 }} />
+                        )}
+                    </React.Fragment>
+                ))}
             </div>
 
-            {/* Main Form Container */}
-            <div className="bg-black/40 backdrop-blur-xl border border-zinc-800 p-6 sm:p-10 rounded-3xl relative overflow-hidden group">
-                <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[100px] rounded-full group-hover:bg-primary/20 transition-all duration-500" />
-                <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-primary/10 blur-[100px] rounded-full group-hover:bg-primary/20 transition-all duration-500" />
+            {/* Step Content */}
+            <AnimatePresence mode="wait">
+                {renderStep()}
+            </AnimatePresence>
 
-                <AnimatePresence mode="wait">
-                    {renderStep()}
-                </AnimatePresence>
-
-                {currentStep < 3 && (
-                    <div className="flex justify-between pt-8 border-t border-zinc-800 mt-8">
-                        <button
-                            onClick={handleBack}
-                            disabled={currentStep === 1}
-                            className="px-6 py-2 text-zinc-400 hover:text-white disabled:opacity-30 transition-colors"
-                        >
-                            Voltar
-                        </button>
-                        <button
-                            onClick={handleNext}
-                            disabled={
-                                (currentStep === 1 && !formData.niche) ||
-                                (currentStep === 2 && !formData.style)
-                            }
-                            className="px-8 py-2 bg-zinc-900 border border-zinc-800 hover:border-primary/50 text-white rounded-xl transition-all disabled:opacity-50"
-                        >
-                            Próximo
-                        </button>
-                    </div>
+            {/* Navigation */}
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, gap: 12 }}>
+                <button onClick={handleBack} disabled={currentStep === 1} style={{ padding: "14px 24px", background: "transparent", border: "1px solid #27272a", borderRadius: 12, color: currentStep === 1 ? "#3f3f46" : "#a1a1aa", cursor: currentStep === 1 ? "not-allowed" : "pointer", fontWeight: 700, fontSize: 14, fontFamily: "inherit" }}>
+                    ← Voltar
+                </button>
+                {currentStep < 4 && (
+                    <PrimaryBtn onClick={handleNext} style={{ padding: "14px 28px", fontSize: 14 }}>
+                        Próximo →
+                    </PrimaryBtn>
                 )}
-            </div>
-
-            {/* Aesthetic TikTok Glow Footer */}
-            <div className="flex justify-center">
-                <div className="px-6 py-3 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#FF236C]" />
-                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
-                        AI-Powered Viral Content Strategy Engine
-                    </span>
-                </div>
             </div>
         </div>
     );
