@@ -204,83 +204,150 @@ const Radar: React.FC = () => {
       </div>
 
       {/* Product Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "24px" }}>
         {filteredProducts.map((product) => (
-          <div
+          <motion.div
             key={product.id}
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             style={{
-              background: "#111111",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderTop: `3px solid ${product.viralScore > 94 ? '#DEDEDE' : product.viralScore > 90 ? '#a855f7' : '#06b6d4'}`,
+              position: "relative",
+              backgroundColor: "#141414",
+              border: "1px solid #27272a",
               borderRadius: "16px",
-              padding: "20px",
-              cursor: "pointer",
-              transition: "box-shadow 0.2s",
+              overflow: "hidden",
+              transition: "all 0.2s"
             }}
-            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4)")}
-            onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
-            onClick={() => setSelectedProduct(product)}
           >
-            {/* Header Row */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1, minWidth: 0 }}>
-                <div style={{ width: "56px", height: "56px", borderRadius: "12px", overflow: "hidden", background: "#1a1a1a", flexShrink: 0 }}>
-                  <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontWeight: "700", fontSize: "13px", margin: "0 0 2px 0", lineHeight: "1.3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</p>
-                  <p style={{ fontSize: "11px", color: "#71717a", margin: 0 }}>{product.category}</p>
-                </div>
+            {/* Image Section */}
+            <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden" }}>
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                style={{ width: "100%", height: "100%", objectCover: "cover", transition: "transform 0.5s" }}
+              />
+
+              {/* Overlay on Hover */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: 0,
+                transition: "opacity 0.3s",
+                cursor: "pointer"
+              }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
+                onClick={() => setSelectedProduct(product)}
+              >
+                <button
+                  style={{
+                    backgroundColor: "#DEDEDE",
+                    color: "#050505",
+                    fontWeight: "bold",
+                    paddingLeft: "24px",
+                    paddingRight: "24px",
+                    paddingTop: "10px",
+                    paddingBottom: "10px",
+                    borderRadius: "9999px",
+                    border: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  Ver Detalhes
+                </button>
               </div>
-              <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "12px" }}>
-                <p style={{ fontSize: "28px", fontWeight: 900, margin: "0 0 2px 0", lineHeight: 1 }}>{product.viralScore}</p>
-                <p style={{ fontSize: "9px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: 0 }}>Score</p>
+
+              {/* Floating Buttons */}
+              <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                    transition: "all 0.2s",
+                    cursor: "pointer",
+                    border: "none",
+                    backgroundColor: favorites.includes(product.id) ? "#DEDEDE" : "rgba(255,255,255,0.9)",
+                    color: favorites.includes(product.id) ? "#050505" : "#18181b"
+                  }}
+                >
+                  <Icon name="heart" size={18} style={{ fill: favorites.includes(product.id) ? "currentColor" : "none" }} />
+                </button>
+                <button
+                  onClick={(e) => handleDownloadImage(e, product)}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(255,255,255,0.9)",
+                    color: "#18181b",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                    border: "none",
+                    cursor: "pointer"
+                  }}
+                >
+                  <Icon name="download" size={18} />
+                </button>
               </div>
             </div>
 
-            {/* Separator */}
-            <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "16px" }} />
-
-            {/* Metrics Grid 2x2 */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "14px" }}>
-              {[
-                { label: "Preço", value: product.priceText, color: "#DEDEDE" },
-                { label: "Lucro Est.", value: `R$ ${(parseFloat(product.priceText.replace('R$ ', '').replace(',', '.') || '0') * (product.commission / 100)).toFixed(2)}`, color: "#10b981" },
-                { label: "Views/mês", value: `${(product.salesPerDay * 30).toLocaleString()}`, color: "#a855f7" },
-                { label: "Pedidos/mês", value: String(product.salesPerDay * 30), color: "#06b6d4" },
-              ].map(metric => (
-                <div key={metric.label} style={{ background: "#1a1a1a", borderRadius: "8px", padding: "8px 10px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  <p style={{ fontSize: "9px", color: "#71717a", margin: "0 0 3px 0", textTransform: "uppercase", fontWeight: "bold" }}>{metric.label}</p>
-                  <p style={{ fontSize: "13px", fontWeight: "bold", margin: 0, color: metric.color }}>{metric.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Tags */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "14px" }}>
-              {['TikTok', 'Trending', 'Hot'].map(tag => (
-                <span key={tag} style={{ fontSize: "9px", background: "rgba(255,255,255,0.05)", padding: "3px 8px", borderRadius: "20px", color: "#a1a1aa", fontWeight: "bold" }}>
-                  #{tag}
+            {/* Content Section */}
+            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.1em", color: "#DEDEDE", backgroundColor: "rgba(222,222,222,0.1)", paddingLeft: "8px", paddingRight: "8px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "9999px" }}>
+                  {product.category}
                 </span>
-              ))}
-            </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: "bold", color: "#eab308" }}>
+                  <Icon name="star" size={12} style={{ fill: "currentColor" }} />
+                  {product.rating} • {product.sales.toLocaleString()} vendas
+                </div>
+              </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
-                style={{ flex: 1, padding: "9px", background: "rgba(222,222,222,0.08)", border: "1px solid rgba(222,222,222,0.15)", borderRadius: "8px", color: "#DEDEDE", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                Ver Detalhes
-              </button>
-              <button
-                onClick={(e) => e.stopPropagation()}
-                style={{ flex: 1, padding: "9px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", color: "#71717a", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}
-              >
-                Criar Vídeo
-              </button>
+              <h3 style={{ fontWeight: "bold", fontSize: "14px", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", height: "40px" }}>
+                {product.name}
+              </h3>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>
+                  <span>Score Viral</span>
+                  <span>{product.viralScore}%</span>
+                </div>
+                <div style={{ height: "6px", width: "100%", backgroundColor: "#27272a", borderRadius: "9999px", overflow: "hidden" }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${product.viralScore}%` }}
+                    style={{
+                      height: "100%",
+                      borderRadius: "9999px",
+                      backgroundColor: product.viralScore > 90 ? "#10b981" : product.viralScore > 80 ? "#DEDEDE" : "#eab308"
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "8px" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+                  <span style={{ fontSize: "20px", fontWeight: 900 }}>{product.priceText}</span>
+                </div>
+                <div style={{ backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#10b981", fontSize: "10px", fontWeight: "bold", paddingLeft: "8px", paddingRight: "8px", paddingTop: "4px", paddingBottom: "4px", borderRadius: "4px", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
+                  {product.commission}% comissão
+                </div>
+              </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -449,9 +516,7 @@ const Radar: React.FC = () => {
 
               {/* Modal Footer */}
               <div style={{ padding: "24px", borderTop: "1px solid #27272a", backgroundColor: "#141414", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <motion.button
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(222, 222, 222, 0.4)" }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={() => handleAffiliate(selectedProduct)}
                   style={{
                     width: "100%",
@@ -468,11 +533,11 @@ const Radar: React.FC = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
-                    transition: "box-shadow 0.3s ease"
+                    transition: "all 0.2s"
                   }}
                 >
                   <Icon name="link" size={20} /> Afiliar-se agora
-                </motion.button>
+                </button>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button
                     onClick={() => { addNotification("Produto selecionado!", "Redirecionando para o Creatoria."); }}

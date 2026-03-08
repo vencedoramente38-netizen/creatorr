@@ -31,7 +31,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('adminProducts');
+    const saved = localStorage.getItem('products');
     return saved ? JSON.parse(saved) : PRODUCTS_SEED;
   });
 
@@ -102,7 +102,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [profile]);
 
   useEffect(() => {
-    localStorage.setItem('adminProducts', JSON.stringify(products));
+    localStorage.setItem('products', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {

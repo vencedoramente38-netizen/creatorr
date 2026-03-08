@@ -121,7 +121,7 @@ const SyncEditor: React.FC = () => {
   return (
     <div style={{ maxWidth: "64rem", marginLeft: "auto", marginRight: "auto", display: "flex", flexDirection: "column", gap: "32px", paddingBottom: "80px" }}>
       <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "8px" }}>
-        <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.025em" }}>Creator Editor</h1>
+        <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.025em" }}>Sync Editor</h1>
         <p style={{ color: "#71717a" }}>Adicione textos e edite o enquadramento do seu vídeo</p>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", alignSelf: "center", paddingLeft: "12px", paddingRight: "12px", paddingTop: "4px", paddingBottom: "4px", backgroundColor: "#09090B", border: "1px solid #27272a", borderRadius: "9999px", fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>
           <Icon name="shield" size={12} style={{ color: "#10b981" }} /> Processamento Local • Sem Armazenamento
@@ -313,53 +313,27 @@ const SyncEditor: React.FC = () => {
 
             {/* Preview */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-              {/* Shine border wrapper */}
-              <div style={{ position: "relative", display: "inline-block", borderRadius: "28px" }}>
-                {/* Shine border effect */}
-                <div style={{
-                  position: "absolute",
-                  inset: -3,
-                  borderRadius: 31,
-                  padding: 3,
-                  background: "radial-gradient(transparent, transparent, #DEDEDE, #a855f7, #06b6d4, transparent, transparent)",
-                  backgroundSize: "300% 300%",
-                  WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                  WebkitMaskComposite: "xor",
-                  maskComposite: "exclude",
-                  animation: "shine 3s infinite linear",
-                  pointerEvents: "none",
-                  zIndex: 10,
-                }} />
-                <div style={{
-                  aspectRatio: "9/16",
-                  width: "240px",
-                  backgroundColor: "black",
-                  borderRadius: "24px",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  overflow: "hidden",
-                  position: "relative",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
-                }}>
-                  {videoUrl ? (
-                    <video
-                      src={videoUrl}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: `${roundedCorners}px` }}
-                      autoPlay
-                      muted
-                      loop
-                    />
-                  ) : (
-                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", opacity: 0.4 }}>
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" /><path d="m10 8 8 4-8 4V8z" />
-                        </svg>
-                        <p style={{ color: "white", fontSize: "12px", textAlign: "center" }}>Prévia do Vídeo</p>
-                      </div>
-                    </div>
-                  )}
-                  <div style={{ position: "absolute", inset: 0, border: "1px solid rgba(255,255,255,0.1)", pointerEvents: "none", zIndex: 5 }} />
-                </div>
+              <div style={{
+                aspectRatio: "9/16",
+                width: "100%",
+                maxWidth: "320px",
+                backgroundColor: "black",
+                borderRadius: "24px",
+                border: "1px solid #27272a",
+                overflow: "hidden",
+                position: "relative",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+              }}>
+                {videoUrl && (
+                  <video
+                    src={videoUrl}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: `${roundedCorners}px` }}
+                    autoPlay
+                    muted
+                    loop
+                  />
+                )}
+                <div style={{ position: "absolute", inset: 0, border: "2px solid rgba(222, 222, 222, 0.5)", pointerEvents: "none" }} />
               </div>
               <p style={{ fontSize: "12px", color: "#71717a", fontWeight: "medium" as any }}>Preview do Enquadramento</p>
             </div>
@@ -384,9 +358,7 @@ const SyncEditor: React.FC = () => {
               <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #27272a", display: "flex", flexDirection: "column", gap: "24px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <h3 style={{ fontSize: "18px", fontWeight: "bold" }}>Caixas de Texto</h3>
-                  <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(222, 222, 222, 0.4)" }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={addText}
                     style={{
                       display: "flex",
@@ -402,9 +374,11 @@ const SyncEditor: React.FC = () => {
                       cursor: "pointer",
                       transition: "all 0.2s"
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                   >
                     <Icon name="plus" size={14} /> Adicionar
-                  </motion.button>
+                  </button>
                 </div>
 
                 {texts.length === 0 ? (
@@ -557,33 +531,11 @@ const SyncEditor: React.FC = () => {
                 maxWidth: "320px",
                 backgroundColor: "black",
                 borderRadius: "24px",
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid #27272a",
                 overflow: "hidden",
                 position: "relative",
                 boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
               }}>
-                <motion.div
-                  animate={{
-                    x: ['-100%', '200%'],
-                    y: ['-100%', '200%']
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "linear",
-                    repeatDelay: 1
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)',
-                    zIndex: 10,
-                    pointerEvents: 'none'
-                  }}
-                />
                 {videoUrl && (
                   <video
                     src={videoUrl}
@@ -652,33 +604,11 @@ const SyncEditor: React.FC = () => {
                 maxWidth: "280px",
                 backgroundColor: "black",
                 borderRadius: "24px",
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid #27272a",
                 overflow: "hidden",
                 position: "relative",
                 boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
               }}>
-                <motion.div
-                  animate={{
-                    x: ['-100%', '200%'],
-                    y: ['-100%', '200%']
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "linear",
-                    repeatDelay: 1
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)',
-                    zIndex: 10,
-                    pointerEvents: 'none'
-                  }}
-                />
                 {videoUrl && <video src={videoUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay muted loop />}
                 {texts.map((t) => (
                   <div
@@ -745,9 +675,7 @@ const SyncEditor: React.FC = () => {
                     <LoadingOverlay message="Processando vídeo..." />
                   </div>
                 ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(222, 222, 222, 0.5)" }}
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={handleExport}
                     style={{
                       width: "100%",
@@ -767,11 +695,14 @@ const SyncEditor: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "12px",
-                      transition: "all 0.3s ease",
+                      transition: "all 0.2s",
+                      boxShadow: "0 25px 50px -12px rgba(222, 222, 222, 0.2)"
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                   >
                     <Icon name="download" size={24} /> Exportar Vídeo
-                  </motion.button>
+                  </button>
                 )}
               </div>
             </div>
