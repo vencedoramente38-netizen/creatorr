@@ -46,23 +46,19 @@ const Auth: React.FC<AuthProps> = ({ authTab, setAuthTab, expiredMsg, onLoginSuc
     setLoginError("");
     try {
       if (loginEmail === "admin" && loginPassword === "admin321") {
-        const adminSession = { id: "admin", name: "Administrador", email: "admin@creatoria.com", plan_type: "lifetime" };
+        const adminSession = { id: "admin", name: "Administrador", email: "admin@creatoria.com", plan: "lifetime" };
         await STOR.s("session", adminSession);
         onLoginSuccess(adminSession);
         return;
       }
 
       const users = await sbGet("users", `email=eq.${encodeURIComponent(loginEmail)}&select=*`);
-      if (!users.length) { setLoginError("Email não encontrado."); setAuthLoading(false); return; }
+      if (!Array.isArray(users) || !users.length) { setLoginError("Email não encontrado."); setAuthLoading(false); return; }
       const user = users[0];
       if (user.password !== loginPassword) { setLoginError("Senha incorreta."); setAuthLoading(false); return; }
-      if (user.plan_type === "monthly" && user.expires_at) {
-        if (new Date(user.expires_at) < new Date()) { setLoginError("Seu plano expirou."); setAuthLoading(false); return; }
-      }
+
       const session = {
-        id: user.id, name: user.name, email: user.email,
-        plan_type: user.plan_type, expires_at: user.expires_at,
-        activated_at: user.activated_at,
+        id: user.id, name: user.name, email: user.email, plan: user.plan
       };
       await STOR.s("session", session);
       onLoginSuccess(session);
@@ -85,10 +81,10 @@ const Auth: React.FC<AuthProps> = ({ authTab, setAuthTab, expiredMsg, onLoginSuc
 
     try {
       const existing = await sbGet("users", `email=eq.${encodeURIComponent(regEmail)}&select=id`);
-      if (existing.length) { setRegisterError("Este email já está cadastrado."); setAuthLoading(false); return; }
+      if (Array.isArray(existing) && existing.length) { setRegisterError("Este email já está cadastrado."); setAuthLoading(false); return; }
 
       const keys = await sbGet("keys", `key=eq.${keyFormatted}&select=*`);
-      if (!keys.length) { setRegisterError("Chave de ativação inválida."); setAuthLoading(false); return; }
+      if (!Array.isArray(keys) || !keys.length) { setRegisterError("Chave de ativação inválida."); setAuthLoading(false); return; }
 
       const keyData = keys[0];
       if (keyData.used) { setRegisterError("Esta chave já foi utilizada."); setAuthLoading(false); return; }
@@ -96,26 +92,24 @@ const Auth: React.FC<AuthProps> = ({ authTab, setAuthTab, expiredMsg, onLoginSuc
         if (new Date(keyData.expires_at) < new Date()) { setRegisterError("Esta chave expirou."); setAuthLoading(false); return; }
       }
 
-      const now = new Date();
-      const userExpiresAt = keyData.type === "monthly"
-        ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        : null;
-
       const newUsers = await sbPost("users", {
-        name: regName, email: regEmail, password: regPassword,
-        key_used: keyFormatted, plan_type: keyData.type,
-        activated_at: now.toISOString(), expires_at: userExpiresAt,
+        name: regName, email: regEmail, password: regPassword, plan: keyData.type
       });
 
+      if (newUsers.code || newUsers.error) {
+        setRegisterError("Erro interno no banco de dados ao criar usuário.");
+        setAuthLoading(false);
+        return;
+      }
+
+      const now = new Date();
       await sbPatch("keys", `key=eq.${keyFormatted}`, {
         used: true, used_at: now.toISOString(), used_by: regEmail,
       });
 
       const userData = Array.isArray(newUsers) ? newUsers[0] : newUsers;
       const session = {
-        id: userData.id, name: userData.name, email: userData.email,
-        plan_type: userData.plan_type, expires_at: userData.expires_at,
-        activated_at: userData.activated_at,
+        id: userData.id, name: userData.name, email: userData.email, plan: userData.plan
       };
       await STOR.s("session", session);
       addNotification("Bem-vindo!", "Sua conta foi criada com sucesso.");
