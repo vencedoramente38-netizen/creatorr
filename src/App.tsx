@@ -11,7 +11,7 @@ import Settings from './Settings';
 import CreateProfile from './CreateProfile';
 import Auth from './Auth';
 import { Academy } from './Academy';
-import { ViralCreator } from './ViralCreator';
+import ViralCreator from './ViralCreator';
 
 // ─── Global Styles: SF Pro font, rainbow button, neon button, shine ───
 const GlobalStyles = () => (
