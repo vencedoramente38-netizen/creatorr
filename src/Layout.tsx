@@ -59,41 +59,50 @@ const SideIcon = ({ type }: { type: string }) => {
 
 // MagicUI-style Meteor Shower (white meteors)
 export const MeteorShower = () => {
-  const [meteors, setMeteors] = useState<Array<{ id: number; top: string; left: string; delay: string; duration: string }>>([]);
-  useEffect(() => {
-    const generated = Array.from({ length: 30 }, (_, i) => ({
-      id: i,
-      top: "-5%",
-      left: Math.floor(Math.random() * window.innerWidth) + "px",
-      delay: (Math.random() * 5).toFixed(2) + "s",
-      duration: (Math.floor(Math.random() * 8) + 3) + "s",
-    }));
-    setMeteors(generated);
-  }, []);
+  const meteors = Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100 + "vw",
+    delay: (Math.random() * 5).toFixed(2) + "s",
+    duration: (Math.floor(Math.random() * 8) + 3) + "s",
+    size: Math.random() * 1 + 1,
+  }));
 
   return (
     <>
       <style>{`
         @keyframes meteorFall {
           0% { transform: rotate(215deg) translateX(0); opacity: 1; }
-          70% { opacity: 0.8; }
-          100% { transform: rotate(215deg) translateX(-600px); opacity: 0; }
+          70% { opacity: 0.6; }
+          100% { transform: rotate(215deg) translateX(-800px); opacity: 0; }
         }
       `}</style>
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+      <div style={{
+        position: "fixed", inset: 0, pointerEvents: "none",
+        zIndex: 0, overflow: "hidden",
+      }}>
         {meteors.map(m => (
           <span key={m.id} style={{
-            position: "absolute", top: m.top, left: m.left,
-            width: 2, height: 2, borderRadius: "50%",
-            background: "white", boxShadow: "0 0 0 1px rgba(255,255,255,0.1)",
-            animationName: "meteorFall", animationDelay: m.delay,
-            animationDuration: m.duration, animationTimingFunction: "linear",
+            position: "absolute",
+            top: "-20px",
+            left: m.left,
+            width: m.size,
+            height: m.size,
+            borderRadius: "50%",
+            background: "white",
+            animationName: "meteorFall",
+            animationDelay: m.delay,
+            animationDuration: m.duration,
+            animationTimingFunction: "linear",
             animationIterationCount: "infinite",
           }}>
             <div style={{
-              position: "absolute", top: "50%", transform: "translateY(-50%)",
-              left: 0, width: 80, height: 1,
-              background: "linear-gradient(to right, white, transparent)", zIndex: -1,
+              position: "absolute",
+              top: "50%",
+              transform: "translateY(-50%)",
+              right: "100%",
+              width: 80,
+              height: 1,
+              background: "linear-gradient(to left, white, transparent)",
             }} />
           </span>
         ))}
@@ -226,19 +235,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           })}
         </nav>
 
-        <div style={{ padding: "16px", borderTop: "1px solid #141414" }}>
-          <button onClick={handleLogout} style={{
-            width: "100%", display: "flex", alignItems: "center", gap: "12px",
-            padding: "12px", borderRadius: "12px", color: "#ef4444",
-            background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)",
-            cursor: "pointer", transition: "all 0.2s",
-            justifyContent: (!sidebarCollapsed || isMobile) ? "flex-start" : "center",
-            fontFamily: "inherit", fontWeight: "bold"
-          }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"}>
-            <Icon name="logout" size={20} />
-            {(!sidebarCollapsed || isMobile) && <span>Sair da Conta</span>}
-          </button>
-        </div>
+        {/* Logout removed from bottom sidebar */}
       </motion.aside>
 
       {/* Main Content */}
@@ -309,7 +306,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                   <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 4px 4px 12px", borderRadius: "9999px", background: "#09090B", border: "1px solid #141414", cursor: "pointer", transition: "all 0.2s" }}>
                     <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#141414", overflow: "hidden", border: "1px solid #27272a" }}>
                       {profile.avatar ? (
-                        <img src={profile.avatar} alt={profile.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{profile.avatar}</div>
                       ) : (
                         <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#71717a" }}>
                           <Icon name="user" size={16} />
@@ -319,19 +316,33 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
                     <span style={{ fontSize: "14px", fontWeight: 500, color: "white" }}>{profile.name.split(' ')[0]}</span>
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" style={{ width: "224px", padding: "8px", backgroundColor: "#09090B", border: "1px solid #141414" }}>
-                  <div style={{ padding: "8px", borderBottom: "1px solid #141414", marginBottom: "4px" }}>
-                    <p style={{ fontSize: "14px", fontWeight: "bold", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.name}</p>
+                <PopoverContent align="end" style={{
+                  background: "#09090B", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 12, padding: 8, minWidth: 200,
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
+                }}>
+                  <div style={{ padding: "9px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: "4px" }}>
+                    <p style={{ fontSize: "14px", fontWeight: "bold", margin: 0, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.name}</p>
                     <p style={{ fontSize: "12px", color: "#71717a", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.email}</p>
                   </div>
-                  <button onClick={() => setActiveTab('settings')} style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px", borderRadius: "8px", fontSize: "14px", color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
-                    <Icon name="user" size={16} /> Ver Perfil
-                  </button>
-                  <button onClick={() => setActiveTab('settings')} style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px", borderRadius: "8px", fontSize: "14px", color: "#a1a1aa", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
-                    <Icon name="settings" size={16} /> Configurações
-                  </button>
-                  <div style={{ height: "1px", backgroundColor: "#141414", margin: "4px 0" }} />
-                  <button onClick={handleLogout} style={{ width: "100%", display: "flex", alignItems: "center", gap: "8px", padding: "8px", borderRadius: "8px", fontSize: "14px", color: "#ef4444", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}>
+                  {[
+                    { id: 'profile', label: 'Ver perfil', icon: 'user', onClick: () => setActiveTab('settings') },
+                    { id: 'settings', label: 'Configurações', icon: 'settings', onClick: () => setActiveTab('settings') },
+                  ].map(item => (
+                    <button key={item.id} onClick={item.onClick} style={{
+                      width: "100%", padding: "9px 12px", borderRadius: 8, cursor: "pointer",
+                      fontSize: 14, display: "flex", alignItems: "center", gap: 10,
+                      transition: "background 0.15s", background: "none", border: "none", color: "white", textAlign: "left"
+                    }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"} onMouseLeave={e => e.currentTarget.style.background = "none"}>
+                      <Icon name={item.icon} size={16} /> {item.label}
+                    </button>
+                  ))}
+                  <div style={{ height: "1px", backgroundColor: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+                  <button onClick={handleLogout} style={{
+                    width: "100%", padding: "9px 12px", borderRadius: 8, cursor: "pointer",
+                    fontSize: 14, display: "flex", alignItems: "center", gap: 10,
+                    transition: "background 0.15s", background: "none", border: "none", color: "#ef4444", textAlign: "left", fontWeight: 600
+                  }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"} onMouseLeave={e => e.currentTarget.style.background = "none"}>
                     <Icon name="logout" size={16} /> Sair
                   </button>
                 </PopoverContent>

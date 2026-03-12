@@ -48,7 +48,8 @@ body,
 html {
   background-color: #050505;
   color: var(--foreground);
-  font-family: 'Inter', sans-serif;
+  font-family: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
 }
 
 .glow-tiktok {

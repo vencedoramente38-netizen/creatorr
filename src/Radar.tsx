@@ -208,75 +208,94 @@ const Radar: React.FC = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
+            onClick={() => setSelectedProduct(product)}
             style={{
               background: "#09090B",
-              border: "1px solid rgba(255,255,255,0.05)",
-              borderRadius: "16px",
+              borderRadius: "20px",
+              border: "1px solid rgba(255,255,255,0.06)",
               overflow: "hidden",
               cursor: "pointer",
-              transition: "transform 0.2s, box-shadow 0.2s",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               display: "flex",
               flexDirection: "column",
+              position: "relative"
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = "0 12px 24px rgba(0,0,0,0.5)";
+              e.currentTarget.style.transform = "translateY(-6px)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+              e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.6)";
             }}
             onMouseLeave={e => {
               e.currentTarget.style.transform = "none";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
               e.currentTarget.style.boxShadow = "none";
             }}
-            onClick={() => setSelectedProduct(product)}
           >
-            {/* Top Image & Badge */}
-            <div style={{ position: "relative", width: "100%", height: "180px", background: "#1a1a1a" }}>
-              <img src={product.imageUrl} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", top: "12px", right: "12px", background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)", padding: "4px 8px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <span style={{ fontSize: "10px", fontWeight: "bold", color: "#DEDEDE", textTransform: "uppercase", letterSpacing: "0.05em" }}>{product.category}</span>
+            {/* Image Area */}
+            <div style={{ position: "relative", width: "100%", aspectRatio: "1.2/1", background: "#1a1a2e", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <img
+                src={product.image_url || product.imageUrl || product.image || product.img || product.photo}
+                alt={product.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={(e: any) => {
+                  e.target.style.display = "none";
+                  const fallback = document.createElement('div');
+                  fallback.textContent = product.emoji || "📦";
+                  fallback.style.fontSize = "48px";
+                  e.target.parentNode.appendChild(fallback);
+                }}
+              />
+
+              {/* Badges */}
+              <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", padding: "4px 10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981" }} />
+                  <span style={{ fontSize: "10px", fontWeight: 800, color: "white", textTransform: "uppercase" }}>Em Alta</span>
+                </div>
+                <div style={{ background: "rgba(16,185,129,0.9)", padding: "4px 10px", borderRadius: "8px", color: "white", fontSize: "11px", fontWeight: 900 }}>
+                  {product.priceText}
+                </div>
               </div>
             </div>
 
-            {/* Content Details */}
-            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px", flex: 1 }}>
-              <div>
-                <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "0 0 4px 0", color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</h3>
-                <p style={{ fontSize: "20px", fontWeight: 900, color: "#10b981", margin: 0 }}>{product.priceText}</p>
+            {/* Info Area */}
+            <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
+              <div style={{ marginBottom: "16px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 800, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em", background: "rgba(255,255,255,0.04)", padding: "2px 8px", borderRadius: "4px", display: "inline-block", marginBottom: "8px" }}>
+                  {product.category}
+                </span>
+                <h3 style={{ fontSize: "16px", fontWeight: 800, margin: 0, color: "white", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.4 }}>
+                  {product.name}
+                </h3>
               </div>
 
-              {/* Grid Data */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <p style={{ fontSize: "10px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: "0 0 4px 0" }}>Score</p>
-                  <p style={{ fontSize: "14px", fontWeight: 900, color: "#a855f7", margin: 0 }}>{product.viralScore}</p>
+              <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "16px" }} />
+
+              {/* Metrics Grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <p style={{ fontSize: "9px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "4px" }}>Score Viral</p>
+                  <p style={{ fontSize: "15px", fontWeight: 900, color: "#a855f7", margin: 0 }}>{product.viralScore}</p>
                 </div>
-                <div style={{ background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <p style={{ fontSize: "10px", color: "#71717a", textTransform: "uppercase", fontWeight: "bold", margin: "0 0 4px 0" }}>Vendas/mês</p>
-                  <p style={{ fontSize: "14px", fontWeight: 900, color: "#06b6d4", margin: 0 }}>{(product.salesPerDay * 30).toLocaleString()}</p>
+                <div style={{ background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <p style={{ fontSize: "9px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "4px" }}>Vendas/Mês</p>
+                  <p style={{ fontSize: "15px", fontWeight: 900, color: "#06b6d4", margin: 0 }}>{(product.salesPerDay * 30).toLocaleString()}</p>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: "flex", gap: "8px", marginTop: "auto" }}>
-                <button
-                  onClick={e => { e.stopPropagation(); setSelectedProduct(product); }}
-                  style={{ flex: 1, padding: "10px", background: "rgba(255,255,255,0.05)", border: "none", borderRadius: "8px", color: "white", fontSize: "12px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit", transition: "background 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
-                >
-                  Detalhes
-                </button>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    addNotification("Produto selecionado!", "Redirecionando para o Creatoria.");
-                  }}
-                  style={{ flex: 1, padding: "10px", background: "#DEDEDE", border: "none", borderRadius: "8px", color: "#050505", fontSize: "12px", fontWeight: "bold", cursor: "pointer", fontFamily: "inherit", transition: "opacity 0.2s" }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-                  onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                >
-                  Criar Vídeo
-                </button>
-              </div>
+              {/* Button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
+                style={{
+                  width: "100%", padding: "12px", background: "white", color: "black",
+                  borderRadius: "12px", border: "none", fontSize: "13px", fontWeight: 800,
+                  cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "auto"
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "scale(0.98)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+              >
+                Ver produto <Icon name="chevronRight" size={14} />
+              </button>
             </div>
           </div>
         ))}

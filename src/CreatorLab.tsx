@@ -114,6 +114,7 @@ const CreatorLab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [result, setResult] = useState<string | null>(null);
+  const [showRadarModal, setShowRadarModal] = useState(false);
 
   // Form State
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -289,7 +290,7 @@ INSTRUÇÕES DE EDIÇÃO:
       <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.0125em" }}>Creatoria</h1>
+            <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.0125em" }}>Creator Editor</h1>
             <p style={{ color: "#a1a1aa", marginTop: "4px" }}>Crie roteiros e prompts virais otimizados para IA.</p>
           </div>
 
@@ -331,10 +332,22 @@ INSTRUÇÕES DE EDIÇÃO:
           >
             {/* Pergunta 1: Produto */}
             <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>1</span>
-                Selecionar um produto
-              </h3>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                <h3 style={{ fontSize: "18px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+                  <span style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "rgba(222, 222, 222, 0.1)", color: "#DEDEDE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>1</span>
+                  Selecionar um produto
+                </h3>
+                <button
+                  onClick={() => setShowRadarModal(true)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px",
+                    background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "10px", color: "white", fontSize: "12px", fontWeight: 600, cursor: "pointer"
+                  }}
+                >
+                  <Icon name="search" size={14} /> Escolher do radar
+                </button>
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "16px" }}>
                 {favoriteProducts.map((p) => (
                   <button
@@ -848,6 +861,72 @@ INSTRUÇÕES DE EDIÇÃO:
           </button>
         )}
       </div>
+
+      <AnimatePresence>
+        {showRadarModal && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px", background: "rgba(0,0,0,0.8)", backdropFilter: "blur(4px)"
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              style={{
+                width: "100%", maxWidth: "600px", background: "#09090B",
+                borderRadius: "16px", border: "1px solid rgba(255,255,255,0.1)",
+                display: "flex", flexDirection: "column", maxHeight: "80vh", overflow: "hidden"
+              }}
+            >
+              <div style={{ padding: "20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Escolher produto</h2>
+                <button onClick={() => setShowRadarModal(false)} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer" }}>
+                  <Icon name="x" size={20} />
+                </button>
+              </div>
+              <div style={{ padding: "20px", overflowY: "auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                {products.map(product => (
+                  <div
+                    key={product.id}
+                    onClick={() => {
+                      setSelectedProductId(product.id);
+                      setShowRadarModal(false);
+                    }}
+                    style={{
+                      background: "rgba(255,255,255,0.03)", borderRadius: "12px",
+                      border: "1px solid rgba(255,255,255,0.06)", padding: "12px",
+                      cursor: "pointer", transition: "all 0.2s"
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                  >
+                    <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "8px", overflow: "hidden", marginBottom: "12px", background: "#1a1a2e", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <img
+                        src={product.image_url || product.imageUrl || product.image || ""}
+                        alt={product.name}
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        onError={(e: any) => {
+                          e.target.style.display = "none";
+                          const fallback = document.createElement('div');
+                          fallback.textContent = product.emoji || "📦";
+                          fallback.style.fontSize = "32px";
+                          e.target.parentNode.appendChild(fallback);
+                        }}
+                      />
+                    </div>
+                    <p style={{ fontSize: "14px", fontWeight: 700, margin: "0 0 4px 0", color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "10px", color: "#71717a", background: "rgba(255,255,255,0.05)", padding: "2px 6px", borderRadius: "4px" }}>{product.category}</span>
+                      <span style={{ fontSize: "12px", fontWeight: 700, color: "#10b981" }}>{product.priceText}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
