@@ -100,6 +100,51 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Featured Section: Continue de onde parou */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{
+            background: "linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(6,182,212,0.15) 100%)",
+            border: "1px solid rgba(255,255,255,0.1)", borderRadius: "24px", padding: "32px",
+            display: "flex", flexDirection: "column", gap: "20px", position: "relative", overflow: "hidden"
+          }}
+        >
+          <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "200px", height: "200px", borderRadius: "50%", background: "rgba(168,85,247,0.2)", filter: "blur(60px)" }} />
+
+          <div>
+            <span style={{ fontSize: "11px", fontWeight: 900, background: "#a855f7", color: "white", padding: "4px 8px", borderRadius: "4px", textTransform: "uppercase" }}>Em Andamento</span>
+            <h3 style={{ fontSize: "22px", fontWeight: 900, margin: "12px 0 8px 0" }}>Continue de onde parou</h3>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", margin: 0 }}>Você estava editando o roteiro para o produto "Escova Alisadora".</p>
+          </div>
+
+          <button className="rainbow-btn" style={{ width: "fit-content", padding: "12px 24px", minWidth: 160, borderRadius: "12px" }}>
+            Continuar Agora →
+          </button>
+        </motion.div>
+
+        {/* Dicas Rapidas */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{ background: "#141414", border: "1px solid #27272a", borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px" }}
+        >
+          <h3 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>Dicas para você 💡</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {[
+              { text: "Vídeos com ganchos de curiosidade estão convertendo 30% mais hoje.", icon: "📈" },
+              { text: "O cenário 'Estúdio' aumentou a retenção média em 4 segundos.", icon: "🧪" }
+            ].map((tip, i) => (
+              <div key={i} style={{ display: "flex", gap: "16px", alignItems: "start" }}>
+                <span style={{ fontSize: "20px" }}>{tip.icon}</span>
+                <p style={{ fontSize: "13px", color: "#a1a1aa", margin: 0, lineHeight: 1.5 }}>{tip.text}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
         {/* Sales Evolution Chart */}
         <motion.div
@@ -154,47 +199,6 @@ const Dashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
         </motion.div>
-
-        {/* Alerts */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              padding: "24px",
-              borderRadius: "24px",
-              backgroundColor: "#141414",
-              border: "1px solid #27272a"
-            }}
-          >
-            <h3 style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Icon name="alertTriangle" size={18} style={{ color: "#eab308" }} />
-              Alertas de sistema
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "12px",
-                    borderRadius: "16px",
-                    borderLeft: `4px solid ${alert.border}`,
-                    backgroundColor: alert.bg,
-                    cursor: "pointer",
-                    transition: "transform 0.2s"
-                  }}
-                >
-                  <Icon name={alert.icon} size={16} style={{ color: alert.color }} />
-                  <span style={{ fontSize: "12px", fontWeight: 500, color: "#e4e4e7" }}>{alert.text}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
       </div>
     </div>
   );

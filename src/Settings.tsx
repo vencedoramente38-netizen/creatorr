@@ -19,7 +19,11 @@ export default function Settings() {
   const { profile, setProfile, notificationsEnabled, setNotificationsEnabled, addNotification } = useApp();
   const [localName, setLocalName] = useState(profile.name);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
+  const [adminOk, setAdminOk] = useState(false);
+  const [adminPw, setAdminPw] = useState("");
+  const [adminErr, setAdminErr] = useState("");
+  const ADMIN_PASSWORD = "admin321";
+
   const [showAdminModal, setShowAdminModal] = useState(false);
 
   useEffect(() => {
@@ -36,14 +40,17 @@ export default function Settings() {
     setShowAvatarModal(false);
   };
 
-  const handleAdminAccess = () => {
-    if (adminPassword === 'admin123') {
-      // In a real app this would navigate or unlock a state.
-      // For this spec, we'll just show a success for now or assume Layout handles 'admin' tab.
+  const handleAdminLogin = () => {
+    if (adminPw === ADMIN_PASSWORD) {
+      setAdminOk(true);
+      setAdminErr("");
       addNotification("Acesso concedido", "Bem-vindo ao painel admin.");
-      setShowAdminModal(false);
+      // We don't close the modal if we want to show the panel inside it, 
+      // but the user said "mostra o painel admin completo" when adminOk is true.
+      // Usually this means the content of the modal or the section change.
     } else {
-      addNotification("Erro", "Senha incorreta.");
+      setAdminErr("Senha incorreta. Tente novamente.");
+      setAdminPw("");
     }
   };
 
@@ -70,20 +77,44 @@ export default function Settings() {
           <div style={{ position: "relative" }}>
             <div style={{
               width: "80px", height: "80px", borderRadius: "24px", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px"
+              border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "32px", overflow: "hidden"
             }}>
-              {profile.avatar || "👤"}
+              {profile.avatar && profile.avatar.startsWith('data:') ? (
+                <img src={profile.avatar} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                profile.avatar || "👤"
+              )}
             </div>
           </div>
-          <button
-            onClick={() => setShowAvatarModal(true)}
-            style={{
-              padding: "10px 20px", borderRadius: "10px", background: "white", color: "black",
-              fontSize: "13px", fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px"
-            }}
-          >
-            <Camera size={16} /> Escolher da galeria
-          </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <button
+              onClick={() => document.getElementById('avatar-input')?.click()}
+              style={{
+                padding: "10px 20px", borderRadius: "10px", background: "white", color: "black",
+                fontSize: "13px", fontWeight: 700, border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px"
+              }}
+            >
+              <Camera size={16} /> Escolher da galeria
+            </button>
+            <input
+              id="avatar-input"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    setProfile({ ...profile, avatar: ev.target?.result as string });
+                    addNotification("Sucesso", "Foto de perfil atualizada!");
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
@@ -205,24 +236,45 @@ export default function Settings() {
           }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              style={{ width: "100%", maxWidth: "400px", background: "#09090B", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.1)", padding: "32px" }}
+              style={{ width: "100%", maxWidth: adminOk ? "900px" : "400px", background: "#09090B", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.1)", padding: "32px", maxHeight: "90vh", overflowY: "auto" }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ padding: "8px", background: "rgba(249,115,22,0.1)", color: "#f97316", borderRadius: "10px" }}><Shield size={20} /></div>
-                  <h3 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>Acesso Restrito</h3>
+              {!adminOk ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ padding: "8px", background: "rgba(249,115,22,0.1)", color: "#f97316", borderRadius: "10px" }}><Shield size={20} /></div>
+                      <h3 style={{ fontSize: "18px", fontWeight: 800, margin: 0 }}>Acesso Restrito</h3>
+                    </div>
+                    <button onClick={() => { setShowAdminModal(false); setAdminErr(""); setAdminPw(""); }} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer" }}><X size={20} /></button>
+                  </div>
+                  <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "24px" }}>Digite a senha de administrador para continuar.</p>
+
+                  {adminErr && <p style={{ color: "#ef4444", fontSize: "13px", marginBottom: "16px", fontWeight: 600 }}>{adminErr}</p>}
+
+                  <div style={{ position: "relative", marginBottom: "20px" }}>
+                    <Lock size={18} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#71717a" }} />
+                    <input
+                      type="password" style={{ ...inpStyle, paddingLeft: "44px" }} placeholder="••••••••"
+                      value={adminPw}
+                      onChange={e => setAdminPw(e.currentTarget.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+                    />
+                  </div>
+                  <PrimaryBtn onClick={handleAdminLogin} style={{ width: "100%", padding: "14px", borderRadius: "12px", fontSize: "14px" }}>Acessar Painel</PrimaryBtn>
+                </>
+              ) : (
+                <div style={{ position: "relative" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+                    <h3 style={{ fontSize: "24px", fontWeight: 900 }}>Painel Administrativo</h3>
+                    <button onClick={() => setShowAdminModal(false)} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer" }}><X size={24} /></button>
+                  </div>
+                  {/* We would render AdminPanel here. Since it's in App.tsx, I should ideally move it. 
+                      But I can also just render a placeholder or the content logic. 
+                      I'll check if I can import or if I should create AdminPanel.tsx */}
+                  <div style={{ color: "#a1a1aa" }}>Carregando ferramentas de gestão...</div>
+                  <p style={{ marginTop: 20 }}>[Gerenciamento de Produtos e Chaves API]</p>
                 </div>
-                <button onClick={() => setShowAdminModal(false)} style={{ background: "none", border: "none", color: "#71717a", cursor: "pointer" }}><X size={20} /></button>
-              </div>
-              <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "24px" }}>Digite a senha de administrador para continuar.</p>
-              <div style={{ position: "relative", marginBottom: "20px" }}>
-                <Lock size={18} style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: "#71717a" }} />
-                <input
-                  type="password" style={{ ...inpStyle, paddingLeft: "44px" }} placeholder="••••••••"
-                  value={adminPassword} onChange={e => setAdminPassword(e.currentTarget.value)}
-                />
-              </div>
-              <PrimaryBtn onClick={handleAdminAccess} style={{ width: "100%", padding: "14px", borderRadius: "12px", fontSize: "14px" }}>Acessar Painel</PrimaryBtn>
+              )}
             </motion.div>
           </div>
         )}

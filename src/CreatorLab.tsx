@@ -135,6 +135,12 @@ const CreatorLab: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
   const [showRadarModal, setShowRadarModal] = useState(false);
 
+  const handleSelectProductFromRadar = (product: Product) => {
+    setSelectedProductId(product.id);
+    setShowRadarModal(false);
+    addNotification("Produto selecionado", `${product.name} agora está ativo.`);
+  };
+
   // Form State
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [scenario, setScenario] = useState('estudio');
@@ -147,6 +153,10 @@ const CreatorLab: React.FC = () => {
   const [voiceType, setVoiceType] = useState('feminina');
   const [tonality, setTonality] = useState('medio');
   const [speech, setSpeech] = useState('');
+  const [variations, setVariations] = useState<any[]>([]);
+  const [activeVariation, setActiveVariation] = useState(0);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [thumbnails, setThumbnails] = useState<string[]>([]);
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
   const selectedAvatar = AVATARS.find(a => a.id === selectedAvatarId);
@@ -162,28 +172,44 @@ const CreatorLab: React.FC = () => {
     setLoadingMessage('Gerando prompt otimizado para V03...');
     await new Promise(r => setTimeout(r, 2000));
 
-    const prompt = `[V03 PROMPT]
-OBJETIVO: Vídeo de alta conversão para TikTok Shop.
-PRODUTO: ${selectedProduct?.name}
-ESTILO: ${cameraStyle === 'avatar' ? 'Avatar Visual' : 'POV (Ponto de Vista)'}
-CENÁRIO: ${scenario === 'personalizado' ? customScenario : scenario}
-AVATAR: ${selectedAvatar?.name || 'Nenhum'}
-DURAÇÃO: ${duration}
-MOOD: ${mood}
+    const v1 = `[DIRETO AO PONTO]
+GANCHO: PARE TUDO! Você precisa ver isso.
+CORPO: Mostra o ${selectedProduct?.name} em ação no cenário ${scenario}.
+CTA: Clique no link abaixo e garanta o seu.`;
 
-ROTEIRO ESTRUTURADO:
-0-3s: GANCHO - ${mood === 'urgente' ? 'PARE TUDO! Você precisa ver isso.' : 'Finalmente encontrei o segredo para...'}
-3-10s: PROBLEMA/SOLUÇÃO - Mostra o ${selectedProduct?.name} em ação no cenário ${scenario}.
-10-20s: BENEFÍCIOS - Close-ups detalhados, narração ${voiceType} em tom ${tonality}.
-20-30s: CTA - Clique no link abaixo para garantir o seu com desconto.
+    const v2 = `[STORYTELLING]
+GANCHO: Eu finalmente entendi o segredo...
+CORPO: Eu costumava ter problemas com isso, até que o ${selectedProduct?.name} mudou tudo.
+CTA: Não cometa o mesmo erro que eu, garanta o seu agora.`;
 
-INSTRUÇÕES DE EDIÇÃO:
-- Cortes rápidos no ritmo da música.
-- Legendas dinâmicas em cores TikTok (Rosa/Branco).
-- Zoom in/out suave para manter retenção.`;
+    const v3 = `[CURIOSIDADES]
+GANCHO: 3 Coisas que você não sabia sobre o ${selectedProduct?.name}.
+CORPO: 1. Economiza tempo. 2. Qualidade premium. 3. O melhor do mercado hoje.
+CTA: Link na bio para conferir.`;
 
-    setResult(prompt);
+    setVariations([v1, v2, v3]);
+    setResult(v1); // Legacy compatibility if needed
+    setActiveVariation(0);
+
+    setAnalysis({
+      score: 92,
+      reach: "Alto",
+      hooks: ["Visual Atraente", "Urgência", "Prova Social"],
+      tips: ["Mantenha a legenda centralizada", "Use música de tendência"]
+    });
+
+    setThumbnails([
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300&h=300",
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=300&h=300",
+      "https://images.unsplash.com/photo-1526170315870-ef68973ef812?auto=format&fit=crop&q=80&w=300&h=300"
+    ]);
+
     setLoading(false);
+    localStorage.setItem('lastCreatorProject', JSON.stringify({
+      productName: selectedProduct?.name,
+      step: 'Finalizado',
+      date: new Date().toISOString()
+    }));
     confetti({
       particleCount: 150,
       spread: 70,
@@ -261,7 +287,7 @@ INSTRUÇÕES DE EDIÇÃO:
         <div style={{ marginBottom: "32px", textAlign: "center" }}>
           <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "16px" }}>Preview do Script</p>
           <IphoneMockup shine>
-            <div style={{ whiteSpace: "pre-wrap" }}>{result}</div>
+            <div style={{ whiteSpace: "pre-wrap" }}>{variations[activeVariation]}</div>
           </IphoneMockup>
         </div>
 
@@ -269,22 +295,80 @@ INSTRUÇÕES DE EDIÇÃO:
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
             <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
               <Icon name="file" size={20} style={{ color: "#DEDEDE" }} />
-              Prompt Gerado
+              Variações de Roteiro
             </h3>
             <div style={{ display: "flex", gap: "8px" }}>
               <button
-                onClick={() => handleCopy(result || "")}
+                onClick={() => handleCopy(variations[activeVariation])}
                 style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#141414", border: "1px solid #27272a", borderRadius: "99px", fontSize: "12px", fontWeight: "bold", color: "white", cursor: "pointer" }}
               >
                 <Icon name="copy" size={14} /> Copiar
               </button>
-              <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", backgroundColor: "#141414", border: "1px solid #27272a", borderRadius: "99px", fontSize: "12px", fontWeight: "bold", color: "white", cursor: "pointer" }}>
-                <Icon name="refresh" size={14} /> Nova Variação
-              </button>
             </div>
           </div>
+
+          <div style={{ display: "flex", gap: "8px", marginBottom: "16px", overflowX: "auto", paddingBottom: "8px" }}>
+            {["Direto ao ponto", "Storytelling", "Curiosidades"].map((label, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveVariation(i)}
+                style={{
+                  padding: "10px 16px", borderRadius: "10px", border: "1px solid",
+                  borderColor: activeVariation === i ? "#DEDEDE" : "rgba(255,255,255,0.06)",
+                  background: activeVariation === i ? "rgba(255,255,255,0.05)" : "transparent",
+                  color: activeVariation === i ? "white" : "#71717a",
+                  fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap"
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           <div style={{ padding: "16px", borderRadius: "16px", backgroundColor: "rgba(0,0,0,0.5)", border: "1px solid #141414", fontFamily: "monospace", fontSize: "12px", color: "#d4d4d8", whiteSpace: "pre-wrap", maxHeight: "384px", overflowY: "auto" }}>
-            {result}
+            {variations[activeVariation]}
+          </div>
+        </div>
+
+        {/* Análise IA Section */}
+        <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "24px" }}>
+          <div>
+            <h4 style={{ fontSize: "14px", fontWeight: 800, margin: "0 0 12px 0", color: "#10b981", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Icon name="check" size={16} /> Score Viral: {analysis?.score}%
+            </h4>
+            <div style={{ height: "4px", background: "rgba(255,255,255,0.06)", borderRadius: "4px" }}>
+              <div style={{ height: "100%", width: `${analysis?.score}%`, background: "#10b981", borderRadius: "4px" }} />
+            </div>
+            <p style={{ fontSize: "12px", color: "#71717a", marginTop: "12px" }}>Potencial de Alcance: <b style={{ color: "white" }}>{analysis?.reach}</b></p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: "14px", fontWeight: 800, margin: "0 0 12px 0", color: "#DEDEDE" }}>Ganchos Fortes</h4>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {analysis?.hooks.map((h: string, i: number) => (
+                <span key={i} style={{ fontSize: "10px", padding: "4px 8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px", color: "#a1a1aa" }}>{h}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sugestões de Capas */}
+        <div style={{ padding: "24px", borderRadius: "24px", backgroundColor: "#09090B", border: "1px solid #141414", marginBottom: "32px" }}>
+          <h3 style={{ fontSize: "18px", fontWeight: "bold", margin: "0 0 16px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+            <Icon name="sparkles" size={20} style={{ color: "#DEDEDE" }} />
+            Sugestões de Capas (Hooks Visuais)
+          </h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+            {thumbnails.map((url, i) => (
+              <div key={i} style={{ position: "relative", borderRadius: "12px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <img src={url} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)", display: "flex", alignItems: "flex-end", padding: "12px" }}>
+                  <p style={{ fontSize: "10px", fontWeight: 800, color: "white", margin: 0 }}>Variação {i + 1}</p>
+                </div>
+                <button onClick={() => handleCopy(url)} style={{ position: "absolute", top: 8, right: 8, padding: 6, borderRadius: "50%", background: "rgba(0,0,0,0.6)", border: "none", color: "white", cursor: "pointer" }}>
+                  <Icon name="download" size={12} />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 

@@ -188,20 +188,20 @@ export default function ViralCreator() {
                         <motion.div key="1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                             <StepCard active glow={isViralMode}>
                                 <SectionTitle step={1} title="Qual o objeto?" />
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "24px" }}>
                                     {categories.map(cat => (
-                                        <OptionCard key={cat.name} label={cat.name} icon={cat.icon} selected={category === cat.name} onClick={() => setCategory(cat.name)} />
+                                        <OptionCard key={cat.name} label={cat.name.split(' ')[0]} icon={cat.icon} selected={category === cat.name} onClick={() => setCategory(cat.name)} />
                                     ))}
                                 </div>
                                 <div style={{ marginBottom: "24px" }}>
-                                    <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "12px" }}>Sugestões Populares</label>
+                                    <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "12px" }}>Sugestões Rápidas</label>
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                                         {suggestions[category]?.map(s => (
                                             <button
                                                 key={s} onClick={() => setObjeto(s)}
                                                 style={{
-                                                    padding: "8px 16px", borderRadius: "100px", background: objeto === s ? "white" : "rgba(255,255,255,0.03)",
-                                                    color: objeto === s ? "black" : "#71717a", fontSize: "13px", fontWeight: 600, border: "1px solid rgba(255,255,255,0.06)", cursor: "pointer"
+                                                    padding: "10px 20px", borderRadius: "100px", background: objeto === s ? "white" : "rgba(255,255,255,0.03)",
+                                                    color: objeto === s ? "black" : "#71717a", fontSize: "13px", fontWeight: 800, border: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", transition: "all 0.2s"
                                                 }}
                                             >
                                                 {s}
@@ -210,8 +210,11 @@ export default function ViralCreator() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>Personalizado</label>
-                                    <input style={inpStyle} placeholder="Nome do produto ou objeto..." value={objeto} onChange={e => setObjeto(e.currentTarget.value)} />
+                                    <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>Ou digite o objeto</label>
+                                    <div style={{ position: "relative" }}>
+                                        <input style={{ ...inpStyle, paddingLeft: "16px" }} placeholder="Ex: Mini Projetor 4K" value={objeto} onChange={e => setObjeto(e.currentTarget.value)} />
+                                        {objeto && <Check size={16} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", color: "#10b981" }} />}
+                                    </div>
                                 </div>
                             </StepCard>
                         </motion.div>
@@ -221,14 +224,14 @@ export default function ViralCreator() {
                         <motion.div key="2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                             <StepCard active glow={isViralMode}>
                                 <SectionTitle step={2} title="Escolha o Estilo" />
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                     {['POV / Relatável', 'Unboxing Review', 'Storytelling', 'Lifestyle / Estético'].map(s => (
                                         <button
                                             key={s} onClick={() => setStyle(s)}
                                             style={{
-                                                padding: "24px", borderRadius: "16px", background: style === s ? "rgba(255,255,255,0.05)" : "transparent",
-                                                border: `1px solid ${style === s ? "white" : "rgba(255,255,255,0.06)"}`, color: style === s ? "white" : "#71717a",
-                                                cursor: "pointer", textAlign: "center", fontSize: "14px", fontWeight: 700
+                                                padding: "32px 20px", borderRadius: "20px", background: style === s ? "rgba(255,69,0,0.1)" : "transparent",
+                                                border: `1px solid ${style === s ? "#FF4500" : "rgba(255,255,255,0.08)"}`, color: style === s ? "white" : "#71717a",
+                                                cursor: "pointer", textAlign: "center", fontSize: "14px", fontWeight: 800, transition: "all 0.2s"
                                             }}
                                         >
                                             {s}
@@ -245,31 +248,35 @@ export default function ViralCreator() {
                                 <SectionTitle step={3} title="Conteúdo & Detalhes" />
                                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                                     <div>
-                                        <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>Mensagem principal</label>
-                                        <textarea style={{ ...inpStyle, height: "100px", resize: "none" }} placeholder="O que torna este item indispensável?" value={mainMessage} onChange={e => setMainMessage(e.currentTarget.value)} />
+                                        <label style={{ display: "block", fontSize: "11px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>Mensagem Principal</label>
+                                        <textarea
+                                            style={{ ...inpStyle, height: "120px", resize: "none", padding: 16 }}
+                                            placeholder="O que torna este produto irresistível?"
+                                            value={mainMessage}
+                                            onChange={e => setMainMessage(e.currentTarget.value)}
+                                        />
                                     </div>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>Hook (gancho)</label>
-                                            <input style={inpStyle} placeholder="Ex: Você precisa ver isso..." value={hook} onChange={e => setHook(e.currentTarget.value)} />
+                                            <label style={{ display: "block", fontSize: "11px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>Hook (Gancho)</label>
+                                            <input style={inpStyle} placeholder="Ex: Você não vai acreditar..." value={hook} onChange={e => setHook(e.currentTarget.value)} />
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>CTA</label>
+                                            <label style={{ display: "block", fontSize: "11px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>CTA (Chamada)</label>
                                             <input style={inpStyle} placeholder="Ex: Link na Bio!" value={cta} onChange={e => setCta(e.currentTarget.value)} />
                                         </div>
                                     </div>
-                                    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>Restrições</label>
-                                            <input style={inpStyle} placeholder="Ex: Sem palavrões..." value={restrictions} onChange={e => setRestrictions(e.currentTarget.value)} />
+                                            <label style={{ display: "block", fontSize: "11px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>Restrição (Opcional)</label>
+                                            <input style={inpStyle} placeholder="Ex: Sem marca d'água" value={restrictions} onChange={e => setRestrictions(e.currentTarget.value)} />
                                         </div>
                                         <div>
-                                            <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: 600, marginBottom: "8px" }}>Duração alvo</label>
-                                            <select style={inpStyle} value={duration} onChange={e => setDuration(e.currentTarget.value)}>
-                                                <option value="15s">15s</option>
-                                                <option value="30s">30s</option>
-                                                <option value="60s">60s</option>
-                                                <option value="90s">90s</option>
+                                            <label style={{ display: "block", fontSize: "11px", color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: "8px" }}>Duração Alvo</label>
+                                            <select style={{ ...inpStyle, cursor: "pointer" }} value={duration} onChange={e => setDuration(e.currentTarget.value)}>
+                                                <option value="15s">15 segundos (Rápido)</option>
+                                                <option value="30s" selected>30 segundos (Recomendado)</option>
+                                                <option value="60s">60 segundos (Completo)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -281,30 +288,40 @@ export default function ViralCreator() {
                     {step === 4 && (
                         <motion.div key="4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                             <StepCard active glow={isViralMode}>
-                                <SectionTitle step={4} title="Revisão Final" />
-                                <div style={{ background: "rgba(255,255,255,0.02)", borderRadius: "16px", padding: "24px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column", gap: "16px" }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <span style={{ color: "#71717a", fontSize: "13px" }}>Objeto:</span>
-                                        <span style={{ fontWeight: 700 }}>{objeto} ({category})</span>
+                                <SectionTitle step={4} title="Revisão Estratégica" />
+                                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                    <div style={{ padding: 24, background: "rgba(255,255,255,0.02)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.05)" }}>
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                                            <div>
+                                                <p style={{ fontSize: 11, color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Objeto</p>
+                                                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{objeto || "Não definido"}</p>
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: 11, color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Estilo</p>
+                                                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{style}</p>
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: 11, color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Gancho</p>
+                                                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{hook || "Gatilho de Curiosidade"}</p>
+                                            </div>
+                                            <div>
+                                                <p style={{ fontSize: 11, color: "#71717a", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>Tempo</p>
+                                                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>{duration}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setStep(1)}
+                                            style={{ marginTop: 24, fontSize: 12, fontWeight: 700, color: "#f97316", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+                                        >
+                                            <Zap size={14} /> Refinar configurações
+                                        </button>
                                     </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <span style={{ color: "#71717a", fontSize: "13px" }}>Estilo:</span>
-                                        <span style={{ fontWeight: 700 }}>{style}</span>
+
+                                    <div style={{ marginTop: 8 }}>
+                                        <RainbowButton onClick={handleGenerate} style={{ width: "100%", height: "64px" }}>
+                                            Gerar Viral Agora <ArrowRight size={20} />
+                                        </RainbowButton>
                                     </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <span style={{ color: "#71717a", fontSize: "13px" }}>Hook:</span>
-                                        <span style={{ fontWeight: 700 }}>{hook || 'Padrão'}</span>
-                                    </div>
-                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                        <span style={{ color: "#71717a", fontSize: "13px" }}>Duração:</span>
-                                        <span style={{ fontWeight: 700 }}>{duration}</span>
-                                    </div>
-                                    <button onClick={() => setStep(1)} style={{ background: "none", border: "none", color: "#a855f7", fontWeight: 700, fontSize: "13px", cursor: "pointer", alignSelf: "flex-end" }}>Editar tudo</button>
-                                </div>
-                                <div style={{ marginTop: "32px" }}>
-                                    <RainbowButton onClick={handleGenerate} style={{ width: "100%" }}>
-                                        Gerar viral <ArrowRight size={18} />
-                                    </RainbowButton>
                                 </div>
                             </StepCard>
                         </motion.div>

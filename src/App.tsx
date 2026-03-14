@@ -92,24 +92,151 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// ─── RainbowButton helper ───
-export function RainbowButton({ onClick, children, disabled, style = {} }: {
-  onClick?: () => void;
-  children: React.ReactNode;
-  disabled?: boolean;
-  style?: React.CSSProperties;
-}) {
+import { AnimatePresence, motion } from 'motion/react';
+
+// Rainbow Button Component
+export const RainbowButton = ({ onClick, children, disabled, className = "", style = {} }: any) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`rainbow-btn ${className}`}
+    style={{
+      padding: "16px 32px",
+      fontSize: "16px",
+      fontWeight: 800,
+      minWidth: "200px",
+      borderRadius: "14px",
+      cursor: "pointer",
+      border: "none",
+      color: "white",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "10px",
+      ...style
+    }}
+  >
+    {children}
+  </button>
+);
+
+const OnboardingTour = ({ onComplete }: { onComplete: () => void }) => {
+  const [step, setStep] = React.useState(0);
+  const tourSteps = [
+    {
+      title: "Bem-vindo ao CreatorAI Pro! 🎉",
+      description: "Vou te mostrar tudo em menos de 1 minuto. Vamos lá?",
+      position: "center" as const,
+    },
+    {
+      title: "Radar de Produtos 🔥",
+      description: "Aqui você encontra os produtos mais virais do momento com análise completa de comissão e vendas.",
+      target: "tab-radar",
+      position: "right" as const,
+    },
+    {
+      title: "Creator Lab ✨",
+      description: "Gere roteiros virais com IA em segundos. Escolha um produto e deixa a IA trabalhar por você.",
+      target: "tab-creator-lab",
+      position: "right" as const,
+    },
+    {
+      title: "Viral Creator ⚡",
+      description: "Monte roteiros passo a passo seguindo o método viral. Ideal para quem quer bombar no TikTok.",
+      target: "tab-viral-creator",
+      position: "right" as const,
+    },
+  ];
+
+  const currentStep = tourSteps[step];
+  const isLast = step === tourSteps.length - 1;
+
+  const handleNext = () => {
+    if (isLast) {
+      localStorage.setItem("onboardingDone", "true");
+      onComplete();
+    } else {
+      setStep(s => s + 1);
+    }
+  };
+
+  const handleSkip = () => {
+    localStorage.setItem("onboardingDone", "true");
+    onComplete();
+  };
+
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="rainbow-btn"
-      style={{ padding: "12px 28px", fontSize: 15, fontWeight: 700, minWidth: 160, ...style }}
-    >
-      {children}
-    </button>
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        onClick={handleSkip}
+        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(2px)" }}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        style={{
+          position: "relative",
+          background: "#09090B",
+          border: "1px solid rgba(255,255,255,0.15)",
+          borderRadius: "16px",
+          padding: "24px 28px",
+          maxWidth: "320px",
+          zIndex: 10000,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.8)",
+          textAlign: "center"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: 900, marginBottom: "8px", margin: 0 }}>{currentStep.title}</h3>
+        <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.5", marginBottom: "20px" }}>{currentStep.description}</p>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "24px" }}>
+          {tourSteps.map((_, i) => (
+            <div key={i} style={{ width: "8px", height: "8px", borderRadius: "50%", background: step === i ? "#DEDEDE" : "rgba(255,255,255,0.2)" }} />
+          ))}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
+          <button onClick={handleSkip} style={{ background: "none", border: "none", color: "#64748b", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>Pular tour</button>
+          {isLast ? (
+            <RainbowButton onClick={handleNext} style={{ padding: "10px 20px", minWidth: "140px", fontSize: "13px" }}>Começar agora! 🚀</RainbowButton>
+          ) : (
+            <button
+              onClick={handleNext}
+              style={{ background: "#DEDEDE", color: "#050505", border: "none", borderRadius: "10px", padding: "10px 20px", fontWeight: 800, cursor: "pointer", fontSize: "13px" }}
+            >
+              Próximo →
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
-}
+};
+
+export const Toast = ({ message, type, onClose }: { message: string, type: string, onClose: () => void, key?: any }) => {
+  React.useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 50 }}
+      style={{
+        position: "fixed", bottom: 24, right: 24, background: "#09090B",
+        border: "1px solid rgba(255,255,255,0.12)", borderRadius: "12px",
+        padding: "10px 16px", color: "white", fontSize: "13px", fontWeight: 500,
+        zIndex: 9999, boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+        display: "flex", alignItems: "center", gap: "8px", maxWidth: "280px",
+      }}
+    >
+      <div style={{ width: 8, height: 8, borderRadius: "50%", background: type === 'success' ? '#10b981' : '#f59e0b' }} />
+      {message}
+    </motion.div>
+  );
+};
 
 // ─── PrimaryBtn helper ───
 export function PrimaryBtn({ onClick, children, style = {}, disabled }: {
@@ -173,14 +300,14 @@ const AdminPanel: React.FC = () => {
 
 // ─── App Content ───
 const AppContent: React.FC = () => {
-  const { user, setUser } = useApp();
+  const { user, setUser, toasts, removeToast } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
-
   const [appLoading, setAppLoading] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authTab, setAuthTab] = useState("login"); // "login" ou "register"
   const [expiredMsg, setExpiredMsg] = useState("");
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -206,6 +333,9 @@ const AppContent: React.FC = () => {
       setUser(session);
       setAppLoading(false);
       setShowAuth(false);
+
+      const done = localStorage.getItem("onboardingDone") === "true";
+      if (!done) setShowTour(true);
     };
 
     checkSession();
@@ -214,7 +344,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement || document.createElement("link");
     link.type = "image/jpeg"; link.rel = "shortcut icon";
-    link.href = "https://i.postimg.cc/Ghyb70wM/image-removebg-preview.png";
+    link.href = "https://i.postimg.cc/rwwB300w/image.jpg";
     document.head.appendChild(link);
     document.title = "CreatorAI Pro";
   }, []);
@@ -226,6 +356,14 @@ const AppContent: React.FC = () => {
       flexDirection: "column", gap: 16, zIndex: 9999,
     }}>
       <ParticlesBg />
+
+      <AnimatePresence>
+        {showTour && <OnboardingTour onComplete={() => setShowTour(false)} />}
+        {toasts.map((t: any) => (
+          <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
+        ))}
+      </AnimatePresence>
+
       <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
         <div style={{ fontSize: 52, marginBottom: 16 }}>⚡</div>
         <div style={{
@@ -270,6 +408,12 @@ const AppContent: React.FC = () => {
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
       {renderContent()}
+      <AnimatePresence>
+        {showTour && <OnboardingTour onComplete={() => setShowTour(false)} />}
+        {(toasts as any[]).map((t: any) => (
+          <Toast key={t.id} message={t.message} type={t.type} onClose={() => removeToast(t.id)} />
+        ))}
+      </AnimatePresence>
     </Layout>
   );
 };

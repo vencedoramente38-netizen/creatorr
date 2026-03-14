@@ -57,51 +57,96 @@ const SideIcon = ({ type }: { type: string }) => {
   }
 };
 
-// Premium Particles Background
+// Premium Particles Background (Interactive Canvas)
 export const ParticlesBg = () => {
-  const particles = Array.from({ length: 40 }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100 + "vw",
-    top: Math.random() * 100 + "vh",
-    delay: (Math.random() * 5).toFixed(2) + "s",
-    duration: (Math.floor(Math.random() * 15) + 10) + "s",
-    size: Math.random() * 2 + 1,
-    opacity: Math.random() * 0.5 + 0.1,
-  }));
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const circlesRef = React.useRef<any[]>([]);
+  const mouseRef = React.useRef({ x: 0, y: 0 });
+  const rafRef = React.useRef<number | null>(null);
+  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      if (!container) return;
+      canvas.width = container.offsetWidth * dpr;
+      canvas.height = container.offsetHeight * dpr;
+      canvas.style.width = container.offsetWidth + "px";
+      canvas.style.height = container.offsetHeight + "px";
+      ctx.scale(dpr, dpr);
+      initParticles();
+    };
+
+    const initParticles = () => {
+      circlesRef.current = Array.from({ length: 80 }, () => ({
+        x: Math.random() * container.offsetWidth,
+        y: Math.random() * container.offsetHeight,
+        tx: 0, ty: 0,
+        size: Math.random() * 1.5 + 0.5,
+        alpha: 0,
+        targetAlpha: Math.random() * 0.5 + 0.1,
+        dx: (Math.random() - 0.5) * 0.1,
+        dy: (Math.random() - 0.5) * 0.1,
+        magnetism: Math.random() * 4 + 0.1,
+      }));
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, container.offsetWidth, container.offsetHeight);
+      circlesRef.current.forEach(c => {
+        c.alpha = Math.min(c.alpha + 0.02, c.targetAlpha);
+        c.x += c.dx;
+        c.y += c.dy;
+        c.tx += (mouseRef.current.x / (50 / c.magnetism) - c.tx) / 50;
+        c.ty += (mouseRef.current.y / (50 / c.magnetism) - c.ty) / 50;
+        ctx.beginPath();
+        ctx.arc(c.x + c.tx, c.y + c.ty, c.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${c.alpha})`;
+        ctx.fill();
+        if (c.x < 0 || c.x > container.offsetWidth || c.y < 0 || c.y > container.offsetHeight) {
+          c.x = Math.random() * container.offsetWidth;
+          c.y = Math.random() * container.offsetHeight;
+        }
+      });
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left - container.offsetWidth / 2,
+        y: e.clientY - rect.top - container.offsetHeight / 2,
+      };
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("resize", resize);
+    resize();
+    animate();
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("resize", resize);
+    };
+  }, [dpr]);
 
   return (
-    <>
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-50px) translateX(30px); }
-          100% { transform: translateY(0px) translateX(0px); }
-        }
-      `}</style>
-      <div style={{
-        position: "fixed", inset: 0, pointerEvents: "none",
-        zIndex: 0, overflow: "hidden", backgroundColor: "#050505"
-      }}>
-        {particles.map(p => (
-          <span key={p.id} style={{
-            position: "absolute",
-            top: p.top,
-            left: p.left,
-            width: p.size,
-            height: p.size,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.4)",
-            boxShadow: "0 0 10px rgba(255,255,255,0.2)",
-            opacity: p.opacity,
-            animation: `float ${p.duration} ease-in-out infinite`,
-            animationDelay: p.delay,
-          }} />
-        ))}
-        {/* Radical Glow Gradients */}
-        <div style={{ position: "absolute", top: "-10%", left: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "-10%", right: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
-      </div>
-    </>
+    <div ref={containerRef} style={{
+      position: "fixed", inset: 0,
+      pointerEvents: "none", zIndex: 0,
+    }}>
+      <canvas ref={canvasRef} style={{ display: "block" }} />
+      {/* Radical Glow Gradients */}
+      <div style={{ position: "absolute", top: "-10%", left: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "-10%", right: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
+    </div>
   );
 };
 
@@ -133,12 +178,121 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'radar', label: 'Radar de Produtos' },
-    { id: 'criar-perfil', label: 'Criar Perfil' },
     { id: 'creator-lab', label: 'Creator Lab' },
     { id: 'creator-editor', label: 'Creator Editor' },
-    { id: 'viral-creator', label: 'Viral Boost' },
+    { id: 'viral-creator', label: 'Viral Creator' },
     { id: 'academy', label: 'Academy' },
     { id: 'settings', label: 'Configurações' },
+  ];
+
+  const ChecklistProgress = ({ setTab }: { setTab: (t: string) => void }) => {
+    const { addNotification } = useApp();
+    const [minimized, setMinimized] = React.useState(false);
+    const [tasks, setTasks] = React.useState([
+      { id: "profile", label: "Complete seu perfil", description: "Nome e avatar", storageKey: "taskProfileDone", tab: "settings" },
+      { id: "script", label: "Gere um roteiro", description: "Use o Creator Lab", storageKey: "taskScriptDone", tab: "creator-lab" },
+      { id: "product", label: "Favoritar produto", description: "Clique em ❤️ no radar", storageKey: "taskProductDone", tab: "radar" },
+    ]);
+
+    const [completed, setCompleted] = React.useState<Record<string, boolean>>({});
+
+    React.useEffect(() => {
+      const checkTasks = () => {
+        const status: Record<string, boolean> = {};
+        tasks.forEach(t => {
+          status[t.id] = localStorage.getItem(t.storageKey) === "true";
+        });
+        setCompleted(status);
+      };
+      checkTasks();
+      const interval = setInterval(checkTasks, 2000);
+      return () => clearInterval(interval);
+    }, []);
+
+    const completedCount = Object.values(completed).filter(Boolean).length;
+    const isAllDone = completedCount === tasks.length;
+
+    if (minimized) {
+      return (
+        <button
+          onClick={() => setMinimized(false)}
+          style={{
+            position: "fixed", bottom: 24, right: 24, zIndex: 100,
+            background: "#09090B", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "20px", padding: "8px 16px", color: "white",
+            fontSize: "13px", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: "8px"
+          }}
+        >
+          📋 {completedCount}/{tasks.length}
+        </button>
+      );
+    }
+
+    return (
+      <div style={{
+        position: "fixed", bottom: isMobile ? 80 : 24, right: 24, minWidth: "260px",
+        background: "#09090B", border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "16px", padding: "20px", zIndex: 100,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h5 style={{ fontSize: "14px", fontWeight: 800, margin: 0 }}>Onboarding {completedCount}/{tasks.length}</h5>
+          <button onClick={() => setMinimized(true)} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: "4px" }}><Icon name="x" size={14} /></button>
+        </div>
+
+        <div style={{ height: "4px", background: "rgba(255,255,255,0.08)", borderRadius: "4px", marginBottom: "16px", overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: "4px", background: "linear-gradient(to right, #10b981, #DEDEDE)", width: `${(completedCount / tasks.length) * 100}%`, transition: "width 0.5s ease" }} />
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {tasks.map(t => (
+            <div key={t.id} onClick={() => setTab(t.tab)} style={{ display: "flex", alignItems: "start", gap: "12px", cursor: "pointer", opacity: completed[t.id] ? 0.5 : 1 }}>
+              <div style={{
+                width: "20px", height: "20px", borderRadius: "6px", flexShrink: 0,
+                background: completed[t.id] ? "#10b981" : "transparent",
+                border: completed[t.id] ? "none" : "2px solid rgba(255,255,255,0.2)",
+                display: "flex", alignItems: "center", justifyContent: "center", marginTop: "2px"
+              }}>
+                {completed[t.id] && <Icon name="chevronRight" size={12} color="white" />}
+              </div>
+              <div>
+                <p style={{ fontSize: "13px", fontWeight: 700, margin: "0 0 2px 0", textDecoration: completed[t.id] ? "line-through" : "none" }}>{t.label}</p>
+                <p style={{ fontSize: "11px", color: "#64748b", margin: 0 }}>{t.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const touchStartX = React.useRef(0);
+  const touchEndX = React.useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 70) {
+      const tabOrder = ['dashboard', 'radar', 'creator-lab', 'creator-editor', 'viral-creator', 'academy', 'settings'];
+      const currentIndex = tabOrder.indexOf(activeTab);
+      if (diff > 0 && currentIndex < tabOrder.length - 1) {
+        setActiveTab(tabOrder[currentIndex + 1]);
+      } else if (diff < 0 && currentIndex > 0) {
+        setActiveTab(tabOrder[currentIndex - 1]);
+      }
+    }
+  };
+
+  const mobileNavItems = [
+    { id: 'dashboard', label: 'Início', icon: 'dashboard' },
+    { id: 'radar', label: 'Radar', icon: 'radar' },
+    { id: 'creator-lab', label: 'Lab', icon: 'creator-lab' },
+    { id: 'viral-creator', label: 'Viral', icon: 'viral-creator' },
+    { id: 'settings', label: 'Config', icon: 'settings' },
   ];
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -210,18 +364,23 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
           {menuItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
-              <button key={item.id} onClick={() => {
-                setActiveTab(item.id);
-                if (isMobile) setSidebarOpen(false);
-              }} style={{
-                width: "100%", display: "flex", alignItems: "center", gap: "12px",
-                padding: "12px", borderRadius: "12px", transition: "all 0.2s",
-                border: "none", cursor: "pointer", position: "relative",
-                background: isActive ? "rgba(222, 222, 222, 0.07)" : "transparent",
-                color: isActive ? "white" : "#a1a1aa",
-                borderLeft: isActive ? "3px solid #DEDEDE" : "3px solid transparent",
-                textAlign: "left", fontFamily: "inherit",
-              }}>
+              <button
+                key={item.id}
+                id={`tab-${item.id}`}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  if (isMobile) setSidebarOpen(false);
+                }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: "12px",
+                  padding: "12px", borderRadius: "12px", transition: "all 0.2s",
+                  border: "none", cursor: "pointer", position: "relative",
+                  background: isActive ? "rgba(222, 222, 222, 0.07)" : "transparent",
+                  color: isActive ? "white" : "#a1a1aa",
+                  borderLeft: isActive ? "3px solid #DEDEDE" : "3px solid transparent",
+                  textAlign: "left", fontFamily: "inherit",
+                }}
+              >
                 <SideIcon type={item.id} />
                 {(!sidebarCollapsed || isMobile) && <span style={{ fontWeight: isActive ? 600 : 500, whiteSpace: "nowrap" }}>{item.label}</span>}
               </button>
@@ -344,37 +503,51 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
             </div>
           </header>
 
-          <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "16px" : "28px" }}>
+          <div
+            onTouchStart={isMobile ? handleTouchStart : undefined}
+            onTouchEnd={isMobile ? handleTouchEnd : undefined}
+            style={{ flex: 1, overflowY: "auto", padding: isMobile ? "16px" : "28px", paddingBottom: isMobile ? "90px" : "28px" }}
+          >
             {children}
           </div>
 
+          {!isMobile && <ChecklistProgress setTab={setActiveTab} />}
+
           {isMobile && (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{
-                position: "fixed",
-                bottom: 24,
-                left: 24,
-                width: 52,
-                height: 52,
-                borderRadius: "50%",
-                background: "#DEDEDE",
-                color: "#050505",
-                border: "none",
-                cursor: "pointer",
-                zIndex: 100,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                fontSize: 20,
-                fontWeight: 700,
-                transition: "transform 0.3s ease",
-                transform: sidebarOpen ? "rotate(90deg)" : "rotate(0deg)",
-              }}
-            >
-              {sidebarOpen ? "✕" : "☰"}
-            </button>
+            <>
+              <nav style={{
+                position: "fixed", bottom: 0, left: 0, right: 0,
+                background: "rgba(9,9,11,0.98)", backdropFilter: "blur(20px)",
+                borderTop: "1px solid rgba(255,255,255,0.08)",
+                display: "flex", justifyContent: "space-around",
+                padding: "10px 0 calc(10px + env(safe-area-inset-bottom))",
+                zIndex: 40,
+              }}>
+                {mobileNavItems.map(item => (
+                  <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                    background: "none", border: "none", color: activeTab === item.id ? "white" : "#71717a",
+                    cursor: "pointer", transition: "color 0.2s"
+                  }}>
+                    <SideIcon type={item.id} />
+                    <span style={{ fontSize: "10px", fontWeight: 600 }}>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                style={{
+                  position: "fixed", bottom: "calc(100px + env(safe-area-inset-bottom))", left: 16,
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: "#DEDEDE", color: "#050505", border: "none",
+                  zIndex: 45, display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 8px 16px rgba(0,0,0,0.5)",
+                }}
+              >
+                <Icon name={sidebarOpen ? "x" : "menu"} size={20} />
+              </button>
+            </>
           )}
         </div>
       </main>

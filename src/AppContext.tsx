@@ -18,8 +18,9 @@ interface AppContextType {
   markAllAsRead: () => void;
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
-  activeToast: { id: string; title: string; message: string } | null;
-  setActiveToast: (toast: any) => void;
+  toasts: any[];
+  addToast: (message: string, type?: 'success' | 'alert') => void;
+  removeToast: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -144,6 +145,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const [toasts, setToasts] = useState<any[]>([]);
+
+  const addToast = (message: string, type: 'success' | 'alert' = 'success') => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  useEffect(() => {
+    if (notificationsEnabled) {
+      const messages = [
+        "🔥 Novo produto viral detectado!",
+        "📈 Cortador 3x1 subiu no ranking!",
+        "💰 Oportunidade de comissão alta!",
+        "✨ Script gerado com sucesso!",
+      ];
+      const interval = setInterval(() => {
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+        addToast(msg, 'alert');
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [notificationsEnabled]);
+
   const addNotification = (title: string, message: string) => {
     const newNotif: AppNotification = {
       id: Math.random().toString(36).substr(2, 9),
@@ -154,10 +182,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setNotifications(prev => [newNotif, ...prev]);
 
-    setActiveToast({ id: newNotif.id, title, message });
-    setTimeout(() => {
-      setActiveToast(current => current?.id === newNotif.id ? null : current);
-    }, 4000);
+    addToast(message, 'success');
   };
 
   const markAllAsRead = () => {
@@ -174,7 +199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notifications, addNotification,
       markAllAsRead,
       notificationsEnabled, setNotificationsEnabled,
-      activeToast, setActiveToast
+      toasts, addToast, removeToast
     }}>
       {children}
     </AppContext.Provider>
