@@ -58,7 +58,7 @@ const Icon = ({ name, size = 16, ...props }: { name: string, size?: number } & R
   );
 };
 
-const IphoneMockup = ({ children }: { children: React.ReactNode }) => (
+const IphoneMockup = ({ children, shine = false }: { children: React.ReactNode, shine?: boolean }) => (
   <div style={{
     width: "280px",
     height: "560px",
@@ -72,6 +72,25 @@ const IphoneMockup = ({ children }: { children: React.ReactNode }) => (
     display: "flex",
     flexDirection: "column"
   }}>
+    {shine && (
+      <div style={{
+        position: "absolute",
+        inset: -2,
+        borderRadius: "40px",
+        padding: "2px",
+        background: "linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent, rgba(255,255,255,0.1), transparent)",
+        backgroundSize: "200% 200%",
+        animation: "shineBorder 3s infinite linear",
+        zIndex: 5,
+        pointerEvents: "none"
+      }} />
+    )}
+    <style>{`
+      @keyframes shineBorder {
+        0% { background-position: -200% -200%; }
+        100% { background-position: 200% 200%; }
+      }
+    `}</style>
     <div style={{
       position: "absolute",
       top: 0,
@@ -241,7 +260,7 @@ INSTRUÇÕES DE EDIÇÃO:
         {/* iPhone Mockup Integration */}
         <div style={{ marginBottom: "32px", textAlign: "center" }}>
           <p style={{ fontSize: "12px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase", marginBottom: "16px" }}>Preview do Script</p>
-          <IphoneMockup>
+          <IphoneMockup shine>
             <div style={{ whiteSpace: "pre-wrap" }}>{result}</div>
           </IphoneMockup>
         </div>

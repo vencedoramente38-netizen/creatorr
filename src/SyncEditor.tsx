@@ -121,8 +121,8 @@ const SyncEditor: React.FC = () => {
   return (
     <div style={{ maxWidth: "64rem", marginLeft: "auto", marginRight: "auto", display: "flex", flexDirection: "column", gap: "32px", paddingBottom: "80px" }}>
       <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "8px" }}>
-        <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.025em" }}>Sync Editor</h1>
-        <p style={{ color: "#71717a" }}>Adicione textos e edite o enquadramento do seu vídeo</p>
+        <h1 style={{ fontSize: "30px", fontWeight: "bold", letterSpacing: "-0.025em" }}>Creator Editor</h1>
+        <p style={{ color: "#71717a" }}>Edição rápida e enquadramento viral para seus vídeos</p>
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", alignSelf: "center", paddingLeft: "12px", paddingRight: "12px", paddingTop: "4px", paddingBottom: "4px", backgroundColor: "#09090B", border: "1px solid #27272a", borderRadius: "9999px", fontSize: "10px", fontWeight: "bold", color: "#71717a", textTransform: "uppercase" }}>
           <Icon name="shield" size={12} style={{ color: "#10b981" }} /> Processamento Local • Sem Armazenamento
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from './types';
 import { AppProvider, useApp } from './AppContext';
-import Layout, { MeteorShower } from './Layout';
+import Layout, { ParticlesBg } from './Layout';
 import { STOR } from './lib/supabase';
 import Dashboard from './Dashboard';
 import Radar from './Radar';
@@ -225,7 +225,7 @@ const AppContent: React.FC = () => {
       display: "flex", alignItems: "center", justifyContent: "center",
       flexDirection: "column", gap: 16, zIndex: 9999,
     }}>
-      <MeteorShower />
+      <ParticlesBg />
       <div style={{ position: "relative", zIndex: 2, textAlign: "center" }}>
         <div style={{ fontSize: 52, marginBottom: 16 }}>⚡</div>
         <div style={{

@@ -18,6 +18,8 @@ interface AppContextType {
   markAllAsRead: () => void;
   notificationsEnabled: boolean;
   setNotificationsEnabled: (enabled: boolean) => void;
+  activeToast: { id: string; title: string; message: string } | null;
+  setActiveToast: (toast: any) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,7 +29,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('userProfile');
-    return saved ? JSON.parse(saved) : { name: 'Usuário Demo', email: 'demo@creatoria.com.br', avatar: '' };
+    return saved ? JSON.parse(saved) : { name: 'Usuário', email: '...', avatar: '' };
   });
 
   const [products, setProducts] = useState<Product[]>(() => {
@@ -76,13 +78,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : true;
   });
 
+  const [activeToast, setActiveToast] = useState<{ id: string; title: string; message: string } | null>(null);
+
   useEffect(() => {
     // Session is managed purely by App.tsx now
     const checkUser = async () => {
       const session = await STOR.g("session");
       setUser(session ?? null);
       if (session?.email) {
-        setProfile(prev => ({ ...prev, email: session.email }));
+        setProfile(prev => ({ ...prev, email: session.email, name: session.user_metadata?.full_name || 'Usuário' }));
       }
     };
     checkUser();
@@ -149,6 +153,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+
+    setActiveToast({ id: newNotif.id, title, message });
+    setTimeout(() => {
+      setActiveToast(current => current?.id === newNotif.id ? null : current);
+    }, 4000);
   };
 
   const markAllAsRead = () => {
@@ -164,7 +173,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       stats, setStats,
       notifications, addNotification,
       markAllAsRead,
-      notificationsEnabled, setNotificationsEnabled
+      notificationsEnabled, setNotificationsEnabled,
+      activeToast, setActiveToast
     }}>
       {children}
     </AppContext.Provider>

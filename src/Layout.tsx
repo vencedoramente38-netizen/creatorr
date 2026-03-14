@@ -57,55 +57,49 @@ const SideIcon = ({ type }: { type: string }) => {
   }
 };
 
-// MagicUI-style Meteor Shower (white meteors)
-export const MeteorShower = () => {
-  const meteors = Array.from({ length: 30 }, (_, i) => ({
+// Premium Particles Background
+export const ParticlesBg = () => {
+  const particles = Array.from({ length: 40 }, (_, i) => ({
     id: i,
     left: Math.random() * 100 + "vw",
+    top: Math.random() * 100 + "vh",
     delay: (Math.random() * 5).toFixed(2) + "s",
-    duration: (Math.floor(Math.random() * 8) + 3) + "s",
-    size: Math.random() * 1 + 1,
+    duration: (Math.floor(Math.random() * 15) + 10) + "s",
+    size: Math.random() * 2 + 1,
+    opacity: Math.random() * 0.5 + 0.1,
   }));
 
   return (
     <>
       <style>{`
-        @keyframes meteorFall {
-          0% { transform: rotate(215deg) translateX(0); opacity: 1; }
-          70% { opacity: 0.6; }
-          100% { transform: rotate(215deg) translateX(-800px); opacity: 0; }
+        @keyframes float {
+          0% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-50px) translateX(30px); }
+          100% { transform: translateY(0px) translateX(0px); }
         }
       `}</style>
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none",
-        zIndex: 0, overflow: "hidden",
+        zIndex: 0, overflow: "hidden", backgroundColor: "#050505"
       }}>
-        {meteors.map(m => (
-          <span key={m.id} style={{
+        {particles.map(p => (
+          <span key={p.id} style={{
             position: "absolute",
-            top: "-20px",
-            left: m.left,
-            width: m.size,
-            height: m.size,
+            top: p.top,
+            left: p.left,
+            width: p.size,
+            height: p.size,
             borderRadius: "50%",
-            background: "white",
-            animationName: "meteorFall",
-            animationDelay: m.delay,
-            animationDuration: m.duration,
-            animationTimingFunction: "linear",
-            animationIterationCount: "infinite",
-          }}>
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              right: "100%",
-              width: 80,
-              height: 1,
-              background: "linear-gradient(to left, white, transparent)",
-            }} />
-          </span>
+            background: "rgba(255,255,255,0.4)",
+            boxShadow: "0 0 10px rgba(255,255,255,0.2)",
+            opacity: p.opacity,
+            animation: `float ${p.duration} ease-in-out infinite`,
+            animationDelay: p.delay,
+          }} />
         ))}
+        {/* Radical Glow Gradients */}
+        <div style={{ position: "absolute", top: "-10%", left: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "-10%", right: "-10%", width: "40%", height: "40%", background: "radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)", filter: "blur(60px)", pointerEvents: "none" }} />
       </div>
     </>
   );
@@ -156,7 +150,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab }) =>
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100%", backgroundColor: "#050505", color: "white", overflow: "hidden", fontFamily: '"SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
-      <MeteorShower />
+      <ParticlesBg />
 
       {isMobile && sidebarOpen && (
         <div
